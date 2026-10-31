@@ -1,0 +1,719 @@
+// Dados Iniciais e Regras de Negócio do MobillsPro
+// Alexandre & Amanda - Muriaé/MG
+
+export const initialData = {
+  profile: {
+    userName: "Alexandre",
+    partnerName: "Amanda",
+    city: "Muriaé/MG",
+    salaryAlexandre: 9996.21,
+    fellowshipAlexandre: 1100.00,
+    totalIncomeAlexandre: 11096.21,
+    wellhubReimbursementTotal: 549.90,
+    currentMonth: "2026-10"
+  },
+
+  incomes: [
+    {
+      id: "inc-1",
+      userName: "Alexandre",
+      description: "Salário Líquido Mensal",
+      amount: 9996.21,
+      category: "Salário",
+      isRecurring: true,
+      referenceMonth: "2026-10"
+    },
+    {
+      id: "inc-2",
+      userName: "Alexandre",
+      description: "Bolsa Monitoria Acadêmica",
+      amount: 1100.00,
+      category: "Monitoria",
+      isRecurring: true,
+      referenceMonth: "2026-10"
+    }
+  ],
+
+  wellhubReimbursements: [
+    {
+      id: "wh-1",
+      beneficiary: "Amanda",
+      planName: "Wellhub Silver",
+      amount: 183.30,
+      status: "CREDITADO",
+      referenceMonth: "2026-10",
+      description: "Reembolso Wellhub Amanda (crédito em conta/fatura)"
+    },
+    {
+      id: "wh-2",
+      beneficiary: "Taiana",
+      planName: "Wellhub Silver",
+      amount: 183.30,
+      status: "CREDITADO",
+      referenceMonth: "2026-10",
+      description: "Reembolso Wellhub Taiana (crédito via Pix recebido)"
+    },
+    {
+      id: "wh-3",
+      beneficiary: "Nilvana",
+      planName: "Wellhub Silver",
+      amount: 183.30,
+      status: "CREDITADO",
+      referenceMonth: "2026-10",
+      description: "Reembolso Wellhub Nilvana (crédito via Pix recebido)"
+    }
+  ],
+
+  fixedExpenses: [
+    {
+      id: "fix-1",
+      title: "Aluguel Moradia Atual",
+      category: "Moradia",
+      totalAmount: 1621.00,
+      alexandreShare: 810.50,
+      amandaShare: 810.50,
+      isSplit5050: true,
+      beneficiary: "COMPARTILHADO",
+      dueDay: 10,
+      dueDate: "2026-10-10",
+      status: "PAGO",
+      paymentMethod: "PIX",
+      paidAt: "2026-10-09T14:20:00Z",
+      pixCode: "PIX-ALUGUEL-MURIAE-01",
+      referenceMonth: "2026-10"
+    },
+    {
+      id: "fix-2",
+      title: "Prestação do Terreno",
+      category: "Patrimônio/Terreno",
+      totalAmount: 2686.52,
+      alexandreShare: 1343.26,
+      amandaShare: 1343.26,
+      isSplit5050: true,
+      beneficiary: "COMPARTILHADO",
+      dueDay: 15,
+      dueDate: "2026-10-15",
+      status: "PAGO",
+      paymentMethod: "BOLETO",
+      paidAt: "2026-10-14T09:15:00Z",
+      pixCode: "BOL-TERRENO-1026",
+      referenceMonth: "2026-10"
+    },
+    {
+      id: "fix-3",
+      title: "Energia Elétrica (Energisa Muriaé)",
+      category: "Contas de Consumo",
+      totalAmount: 380.00,
+      alexandreShare: 190.00,
+      amandaShare: 190.00,
+      isSplit5050: true,
+      beneficiary: "COMPARTILHADO",
+      dueDay: 20,
+      dueDate: "2026-10-20",
+      status: "PAGO",
+      paymentMethod: "PIX",
+      paidAt: "2026-10-18T16:30:00Z",
+      pixCode: "ENERGISA-PIX-49821",
+      referenceMonth: "2026-10"
+    },
+    {
+      id: "fix-4",
+      title: "Internet Fibra Óptica Muriaé",
+      category: "Contas de Consumo",
+      totalAmount: 130.00,
+      alexandreShare: 65.00,
+      amandaShare: 65.00,
+      isSplit5050: true,
+      beneficiary: "COMPARTILHADO",
+      dueDay: 22,
+      dueDate: "2026-10-22",
+      status: "PAGO",
+      paymentMethod: "PIX",
+      paidAt: "2026-10-21T11:00:00Z",
+      pixCode: "FIBRA-PIX-883",
+      referenceMonth: "2026-10"
+    },
+    {
+      id: "fix-5",
+      title: "Condomínio / Taxa Manutenção",
+      category: "Moradia",
+      totalAmount: 140.00,
+      alexandreShare: 70.00,
+      amandaShare: 70.00,
+      isSplit5050: true,
+      beneficiary: "COMPARTILHADO",
+      dueDay: 10,
+      dueDate: "2026-10-10",
+      status: "PAGO",
+      paymentMethod: "PIX",
+      paidAt: "2026-10-10T10:00:00Z",
+      pixCode: "CONDOMINIO-PIX-12",
+      referenceMonth: "2026-10"
+    },
+    {
+      id: "fix-6",
+      title: "Água e Esgoto (DEMSUR Muriaé)",
+      category: "Contas de Consumo",
+      totalAmount: 90.00,
+      alexandreShare: 45.00,
+      amandaShare: 45.00,
+      isSplit5050: true,
+      beneficiary: "COMPARTILHADO",
+      dueDay: 25,
+      dueDate: "2026-10-25",
+      status: "PAGO",
+      paymentMethod: "PIX",
+      paidAt: "2026-10-24T08:45:00Z",
+      pixCode: "DEMSUR-PIX-994",
+      referenceMonth: "2026-10"
+    },
+    {
+      id: "fix-7",
+      title: "Diarista / Faxina Quinzenal",
+      category: "Serviços Domésticos",
+      totalAmount: 360.00,
+      alexandreShare: 180.00,
+      amandaShare: 180.00,
+      isSplit5050: true,
+      beneficiary: "COMPARTILHADO",
+      dueDay: 28,
+      dueDate: "2026-10-28",
+      status: "PAGO",
+      paymentMethod: "PIX",
+      paidAt: "2026-10-28T17:00:00Z",
+      pixCode: "DIARISTA-PIX-MARIA",
+      referenceMonth: "2026-10"
+    },
+    {
+      id: "fix-8",
+      title: "Unimed Individual (Exclusivo Alexandre)",
+      category: "Saúde Individual",
+      totalAmount: 485.00,
+      alexandreShare: 485.00,
+      amandaShare: 0.00,
+      isSplit5050: false,
+      beneficiary: "ALEXANDRE",
+      dueDay: 15,
+      dueDate: "2026-10-15",
+      status: "PAGO",
+      paymentMethod: "BOLETO",
+      paidAt: "2026-10-15T12:00:00Z",
+      pixCode: "UNIMED-BOL-552",
+      referenceMonth: "2026-10"
+    },
+    {
+      id: "fix-9",
+      title: "Academia Alexandre (Exclusivo)",
+      category: "Saúde & Fitness",
+      totalAmount: 140.00,
+      alexandreShare: 140.00,
+      amandaShare: 0.00,
+      isSplit5050: false,
+      beneficiary: "ALEXANDRE",
+      dueDay: 5,
+      dueDate: "2026-10-05",
+      status: "PAGO",
+      paymentMethod: "PIX",
+      paidAt: "2026-10-05T09:00:00Z",
+      pixCode: "ACAD-PIX-ALEX",
+      referenceMonth: "2026-10"
+    }
+  ],
+
+  creditCards: [
+    {
+      id: "card-nubank",
+      cardName: "Nubank",
+      color: "purple",
+      closingDay: 24,
+      dueDay: 1,
+      creditLimit: 14000.00,
+      themeClass: "from-purple-900 to-indigo-950 border-purple-500/40"
+    },
+    {
+      id: "card-bradesco",
+      cardName: "Bradesco",
+      color: "red",
+      closingDay: 18,
+      dueDay: 25,
+      creditLimit: 18500.00,
+      themeClass: "from-red-950 to-rose-950 border-red-500/40"
+    },
+    {
+      id: "card-mercadopago",
+      cardName: "Mercado Pago",
+      color: "sky",
+      closingDay: 10,
+      dueDay: 17,
+      creditLimit: 8500.00,
+      themeClass: "from-sky-950 to-blue-950 border-sky-500/40"
+    }
+  ],
+
+  // Auditoria histórica de 6 meses (Maio a Outubro de 2026)
+  monthlyAuditSummary: [
+    {
+      month: "2026-05",
+      label: "Maio 2026",
+      supermarketTotal: 1490.80,
+      supermarketBreakdown: { bh: 680.40, bahamas: 520.30, topfrut: 290.10 },
+      nubankTotal: 1120.50,
+      bradescoTotal: 1480.20,
+      mercadoPagoTotal: 490.10,
+      totalCards: 3090.80,
+      atypicalAmount: 0,
+      notes: "Mês regular dentro da média histórica"
+    },
+    {
+      month: "2026-06",
+      label: "Junho 2026",
+      supermarketTotal: 1515.70,
+      supermarketBreakdown: { bh: 710.00, bahamas: 490.50, topfrut: 315.20 },
+      nubankTotal: 1080.40,
+      bradescoTotal: 1520.10,
+      mercadoPagoTotal: 440.00,
+      totalCards: 3040.50,
+      atypicalAmount: 0,
+      notes: "Gastos de mercado alinhados à média"
+    },
+    {
+      month: "2026-07",
+      label: "Julho 2026",
+      supermarketTotal: 1520.70,
+      supermarketBreakdown: { bh: 695.20, bahamas: 540.10, topfrut: 285.40 },
+      nubankTotal: 1240.80,
+      bradescoTotal: 1410.00,
+      mercadoPagoTotal: 510.20,
+      totalCards: 3161.00,
+      atypicalAmount: 0,
+      notes: "Mês estável"
+    },
+    {
+      month: "2026-08",
+      label: "Agosto 2026",
+      supermarketTotal: 1560.00,
+      supermarketBreakdown: { bh: 720.00, bahamas: 510.00, topfrut: 330.00 },
+      nubankTotal: 1190.00,
+      bradescoTotal: 1480.00,
+      mercadoPagoTotal: 480.00,
+      totalCards: 3150.00,
+      atypicalAmount: 0,
+      notes: "Pequena variação de reposição de despensa"
+    },
+    {
+      month: "2026-09",
+      label: "Setembro 2026",
+      supermarketTotal: 1512.10,
+      supermarketBreakdown: { bh: 705.50, bahamas: 505.00, topfrut: 301.60 },
+      nubankTotal: 1150.30,
+      bradescoTotal: 1480.00,
+      mercadoPagoTotal: 460.00,
+      totalCards: 3090.30,
+      atypicalAmount: 0,
+      notes: "Penúltima parcela no Bradesco (9/10)"
+    },
+    {
+      month: "2026-10",
+      label: "Outubro 2026",
+      supermarketTotal: 2600.10, // Pico atípico!
+      supermarketBreakdown: { bh: 1250.50, bahamas: 890.60, topfrut: 459.00 },
+      nubankTotal: 1820.40,
+      bradescoTotal: 1780.00, // Encerrou parcela 10/10 de R$ 480
+      mercadoPagoTotal: 1520.00, // Contém Funilaria R$ 1.000
+      totalCards: 5120.40,
+      atypicalAmount: 1480.00, // Funilaria R$ 1.000 + Parcela encerrada Bradesco R$ 480
+      notes: "PICO ATÍPICO DE OUTUBRO: Mercado R$ 2.600,10 + Funilaria R$ 1.000 + Fim de parcelamento Bradesco"
+    }
+  ],
+
+  // Média histórica calculada
+  supermarketBenchmark: {
+    historicalAverage: 1533.28,
+    octoberPeak: 2600.10,
+    octoberExcess: 1066.82,
+    atypicalTotalOctober: 1480.00,
+    cleanOctoberCardsTotal: 3640.40 // 5120.40 - 1480.00
+  },
+
+  // Transações de cartão detalhadas
+  cardTransactions: [
+    {
+      id: "tx-c1",
+      cardId: "card-mercadopago",
+      cardName: "Mercado Pago",
+      establishment: "Funilaria & Pintura Muriaé",
+      category: "Manutenção Veículo",
+      amount: 1000.00,
+      transactionDate: "2026-10-12",
+      installmentInfo: "1/1",
+      isAtypical: true,
+      atypicalReason: "Gasto atípico extraordinário (reparo colisão funilaria) que não se repetirá",
+      referenceMonth: "2026-10",
+      isShared: true
+    },
+    {
+      id: "tx-c2",
+      cardId: "card-bradesco",
+      cardName: "Bradesco",
+      establishment: "Casas Bahia / Eletrodoméstico",
+      category: "Bens Duráveis",
+      amount: 480.00,
+      transactionDate: "2026-10-04",
+      installmentInfo: "10/10 (FINALIZADO)",
+      isAtypical: true,
+      atypicalReason: "Última parcela (10/10) encerrada em Outubro. Não existirá a partir de Novembro.",
+      referenceMonth: "2026-10",
+      isShared: true
+    },
+    {
+      id: "tx-c3",
+      cardId: "card-nubank",
+      cardName: "Nubank",
+      establishment: "Supermercados BH Muriaé - Centro",
+      category: "Supermercado",
+      amount: 680.50,
+      transactionDate: "2026-10-06",
+      installmentInfo: "À vista",
+      isAtypical: false,
+      atypicalReason: null,
+      referenceMonth: "2026-10",
+      isShared: true
+    },
+    {
+      id: "tx-c4",
+      cardId: "card-nubank",
+      cardName: "Nubank",
+      establishment: "Supermercados BH Muriaé - Barra",
+      category: "Supermercado",
+      amount: 570.00,
+      transactionDate: "2026-10-21",
+      installmentInfo: "À vista",
+      isAtypical: false,
+      atypicalReason: null,
+      referenceMonth: "2026-10",
+      isShared: true
+    },
+    {
+      id: "tx-c5",
+      cardId: "card-bradesco",
+      cardName: "Bradesco",
+      establishment: "Bahamas Mix Muriaé",
+      category: "Supermercado",
+      amount: 890.60,
+      transactionDate: "2026-10-14",
+      installmentInfo: "À vista",
+      isAtypical: false,
+      atypicalReason: null,
+      referenceMonth: "2026-10",
+      isShared: true
+    },
+    {
+      id: "tx-c6",
+      cardId: "card-nubank",
+      cardName: "Nubank",
+      establishment: "Top Frut Gourmet Muriaé",
+      category: "Hortifruti & Carnes",
+      amount: 459.00,
+      transactionDate: "2026-10-18",
+      installmentInfo: "À vista",
+      isAtypical: false,
+      atypicalReason: null,
+      referenceMonth: "2026-10",
+      isShared: true
+    },
+    {
+      id: "tx-c7",
+      cardId: "card-nubank",
+      cardName: "Nubank",
+      establishment: "Farmácia Indiana Muriaé",
+      category: "Farmácia",
+      amount: 110.90,
+      transactionDate: "2026-10-09",
+      installmentInfo: "À vista",
+      isAtypical: false,
+      atypicalReason: null,
+      referenceMonth: "2026-10",
+      isShared: true
+    },
+    {
+      id: "tx-c8",
+      cardId: "card-bradesco",
+      cardName: "Bradesco",
+      establishment: "Posto Faisão Muriaé",
+      category: "Combustível",
+      amount: 240.00,
+      transactionDate: "2026-10-11",
+      installmentInfo: "À vista",
+      isAtypical: false,
+      atypicalReason: null,
+      referenceMonth: "2026-10",
+      isShared: true
+    },
+    {
+      id: "tx-c9",
+      cardId: "card-bradesco",
+      cardName: "Bradesco",
+      establishment: "Posto DM Combustíveis",
+      category: "Combustível",
+      amount: 240.00,
+      transactionDate: "2026-10-25",
+      installmentInfo: "À vista",
+      isAtypical: false,
+      atypicalReason: null,
+      referenceMonth: "2026-10",
+      isShared: true
+    },
+    {
+      id: "tx-c10",
+      cardId: "card-mercadopago",
+      cardName: "Mercado Pago",
+      establishment: "Restaurante e Churrascaria Muriaé",
+      category: "Alimentação Fora",
+      amount: 180.00,
+      transactionDate: "2026-10-19",
+      installmentInfo: "À vista",
+      isAtypical: false,
+      atypicalReason: null,
+      referenceMonth: "2026-10",
+      isShared: true
+    },
+    {
+      id: "tx-c11",
+      cardId: "card-mercadopago",
+      cardName: "Mercado Pago",
+      establishment: "Padaria Central Muriaé",
+      category: "Padaria / Lanches",
+      amount: 140.00,
+      transactionDate: "2026-10-22",
+      installmentInfo: "À vista",
+      isAtypical: false,
+      atypicalReason: null,
+      referenceMonth: "2026-10",
+      isShared: true
+    }
+  ],
+
+  // Transações Pix (Detector e Alertas)
+  pixTransactions: [
+    {
+      id: "pix-1",
+      direction: "ENTRADA",
+      amount: 183.30,
+      partyName: "Amanda (Wellhub)",
+      category: "Reembolso Wellhub",
+      description: "Compensação Wellhub Mensal - Amanda",
+      transactionDate: "2026-10-02T10:14:00Z",
+      e2eId: "E00000000202610021014a9918",
+      isAlert: false,
+      alertReason: "Reembolso automático cadastrado",
+      referenceMonth: "2026-10"
+    },
+    {
+      id: "pix-2",
+      direction: "ENTRADA",
+      amount: 183.30,
+      partyName: "Taiana (Wellhub)",
+      category: "Reembolso Wellhub",
+      description: "Compensação Wellhub Mensal - Taiana",
+      transactionDate: "2026-10-03T15:22:00Z",
+      e2eId: "E00000000202610031522b7712",
+      isAlert: false,
+      alertReason: "Reembolso automático cadastrado",
+      referenceMonth: "2026-10"
+    },
+    {
+      id: "pix-3",
+      direction: "ENTRADA",
+      amount: 183.30,
+      partyName: "Nilvana (Wellhub)",
+      category: "Reembolso Wellhub",
+      description: "Compensação Wellhub Mensal - Nilvana",
+      transactionDate: "2026-10-04T09:40:00Z",
+      e2eId: "E00000000202610040940c3319",
+      isAlert: false,
+      alertReason: "Reembolso automático cadastrado",
+      referenceMonth: "2026-10"
+    },
+    {
+      id: "pix-4",
+      direction: "SAIDA",
+      amount: 810.50,
+      partyName: "Imobiliária Muriaé",
+      category: "Moradia",
+      description: "Metade Aluguel Moradia Atual Outubro/2026",
+      transactionDate: "2026-10-09T14:20:00Z",
+      e2eId: "E00000000202610091420d4411",
+      isAlert: false,
+      alertReason: "Quitação de Despesa Fixa Checklist",
+      referenceMonth: "2026-10"
+    },
+    {
+      id: "pix-5",
+      direction: "SAIDA",
+      amount: 180.00,
+      partyName: "Maria da Penha (Diarista)",
+      category: "Serviços Domésticos",
+      description: "Faxina quinzenal residência Muriaé",
+      transactionDate: "2026-10-28T17:00:00Z",
+      e2eId: "E00000000202610281700e5512",
+      isAlert: false,
+      alertReason: "Serviço doméstico acordado",
+      referenceMonth: "2026-10"
+    },
+    {
+      id: "pix-6",
+      direction: "SAIDA",
+      amount: 190.00,
+      partyName: "Energisa Minas Gerais",
+      category: "Contas de Consumo",
+      description: "Luz compartilhada Muriaé",
+      transactionDate: "2026-10-18T16:30:00Z",
+      e2eId: "E00000000202610181630f6613",
+      isAlert: false,
+      alertReason: "Boleto/Pix de Concessionária",
+      referenceMonth: "2026-10"
+    },
+    {
+      id: "pix-7",
+      direction: "SAIDA",
+      amount: 140.00,
+      partyName: "Academia Performance Muriaé",
+      category: "Saúde & Fitness",
+      description: "Mensalidade Academia Alexandre Outubro",
+      transactionDate: "2026-10-05T09:00:00Z",
+      e2eId: "E00000000202610050900g7714",
+      isAlert: false,
+      alertReason: "Despesa Individual Alexandre",
+      referenceMonth: "2026-10"
+    },
+    {
+      id: "pix-8",
+      direction: "SAIDA",
+      amount: 250.00,
+      partyName: "Chave Pix Celular Desconhecido",
+      category: "Avulso / Manutenção",
+      description: "Serviço avulso encanador reparo torneira",
+      transactionDate: "2026-10-23T11:15:00Z",
+      e2eId: "E00000000202610231115h8815",
+      isAlert: true,
+      alertReason: "DETECTOR: Pix avulso fora da rotina cadastrada de fixas",
+      referenceMonth: "2026-10"
+    }
+  ],
+
+  // Parâmetros do Simulador de Transição de Moradia (Centro - Caixa SBPE)
+  housingSimulation: {
+    current: {
+      title: "Moradia Atual (Bairro)",
+      rentShare: 810.50,
+      landShare: 1343.26,
+      subtotalHousing: 2153.76,
+      fuelCost: 480.00,
+      condoShare: 70.00,
+      totalMonthlyCost: 2703.76,
+      logisticsNote: "Necessidade contínua de deslocamento de carro/moto para o Centro de Muriaé, trabalho e comércio."
+    },
+    newCenterApartment: {
+      title: "Apartamento Novo no Centro (CAIXA SBPE)",
+      caixaSacFirstInstallment: 3231.32,
+      caixaSacAmortizationPerMonth: 9.85, // SAC decrescente
+      condoShare: 250.00,
+      subtotalHousing: 3481.32,
+      fuelCost: 120.00, // Economia drástica rodando a pé no Centro
+      fuelSavings: 360.00, // 480 - 120
+      netMonthlyCost: 3601.32,
+      logisticsNote: "Localização estratégica no Centro de Muriaé: mercados (BH/Bahamas), farmácias, bancos, clínicas e trabalho acessíveis a pé.",
+      landStrategyOptions: [
+        {
+          id: "opt-1",
+          name: "Venda do Terreno",
+          description: "Quita o saldo devedor do terreno e gera liquidez imediata para amortizar a Caixa ou aportar na Nomad/Selic."
+        },
+        {
+          id: "opt-2",
+          name: "Manter Terreno para Construção Futura",
+          description: "Mantém a parcela de R$ 1.343,26 como investimento patrimonial de longo prazo."
+        },
+        {
+          id: "opt-3",
+          name: "Locação Comercial do Terreno",
+          description: "Renda de aluguel que subsidia a prestação."
+        }
+      ]
+    }
+  },
+
+  // Módulo de Investimentos & Ativos (Nomad USD, Tesouro Selic, CDB)
+  investments: [
+    {
+      id: "inv-1",
+      accountName: "Conta Nomad Global (Augusto / Família)",
+      institution: "Nomad Fintech / DriveWealth USA",
+      assetType: "USD_OFFSHORE",
+      currency: "USD",
+      balanceOriginal: 4250.00,
+      exchangeRate: 5.75, // USD/BRL
+      balanceBRL: 24437.50,
+      annualRate: "8.5% a.a. (ETF VT + S&P 500)",
+      monthlyYieldEst: 165.00,
+      lastUpdated: "2026-10-31",
+      notes: "Alocação dolarizada defensiva contra inflação e risco-país.",
+      holdings: [
+        { ticker: "VT (Vanguard Total World)", allocation: "55%", valueUSD: 2337.50 },
+        { ticker: "VOO (Vanguard S&P 500)", allocation: "30%", valueUSD: 1275.00 },
+        { ticker: "Cash Dólar Rendendo", allocation: "15%", valueUSD: 637.50 }
+      ]
+    },
+    {
+      id: "inv-2",
+      accountName: "Tesouro Selic 2029",
+      institution: "Tesouro Direto / Itaú",
+      assetType: "RENDA_FIXA_POS",
+      currency: "BRL",
+      balanceOriginal: 35000.00,
+      exchangeRate: 1.00,
+      balanceBRL: 35000.00,
+      annualRate: "13.75% a.a. (Taxa Selic Meta)",
+      monthlyYieldEst: 375.00,
+      lastUpdated: "2026-10-31",
+      notes: "Reserva de emergência principal e liquidez garantida pelo Tesouro Nacional.",
+      holdings: [
+        { ticker: "LFT (Tesouro Selic 2029)", allocation: "100%", valueBRL: 35000.00 }
+      ]
+    },
+    {
+      id: "inv-3",
+      accountName: "CDB 110% CDI Liquidez Diária",
+      institution: "Nubank / Bradesco",
+      assetType: "RENDA_FIXA_POS",
+      currency: "BRL",
+      balanceOriginal: 18450.00,
+      exchangeRate: 1.00,
+      balanceBRL: 18450.00,
+      annualRate: "15.12% a.a. (110% do CDI)",
+      monthlyYieldEst: 215.00,
+      lastUpdated: "2026-10-31",
+      notes: "Colchão para amortizações extraordinárias e pagamentos à vista.",
+      holdings: [
+        { ticker: "CDB Pós-Fixado DI", allocation: "100%", valueBRL: 18450.00 }
+      ]
+    },
+    {
+      id: "inv-4",
+      accountName: "Terreno Residencial Muriaé (Fração Paga)",
+      institution: "Loteadora Muriaé",
+      assetType: "PATRIMONIO_IMOVEL",
+      currency: "BRL",
+      balanceOriginal: 48500.00,
+      exchangeRate: 1.00,
+      balanceBRL: 48500.00,
+      annualRate: "Apreciação imobiliária ~10% a.a.",
+      monthlyYieldEst: 0,
+      lastUpdated: "2026-10-31",
+      notes: "Total de parcelas quitadas até o momento que compõem o patrimônio líquido da família.",
+      holdings: [
+        { ticker: "Lote Residencial Urbano", allocation: "100%", valueBRL: 48500.00 }
+      ]
+    }
+  ]
+};

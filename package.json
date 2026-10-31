@@ -1,0 +1,16 @@
+{
+  "name": "mobillspro",
+  "version": "1.0.0",
+  "description": "MobillsPro - Sistema Definitivo de Controle Financeiro Pessoal do Alexandre e da Amanda em Muriaé/MG",
+  "scripts": {
+    "install:all": "npm install --prefix server && npm install --prefix client",
+    "build:client": "npm run build --prefix client",
+    "start": "node server/src/index.js",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "dev": "node scripts/dev.js"
+  },
+  "keywords": ["finance", "fintech", "pwa", "react", "tailwind", "muriane", "dashboard"],
+  "author": "Alexandre",
+  "license": "MIT"
+}
