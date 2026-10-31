@@ -53,3 +53,4 @@ export function formatMonthName(monthString) {
   };
   return map[monthString] || monthString;
 }
+

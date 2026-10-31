@@ -252,3 +252,4 @@ export function PixDetectorView({ pixData, onAddPix }) {
     </div>
   );
 }
+

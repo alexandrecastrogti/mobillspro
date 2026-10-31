@@ -7,6 +7,9 @@ import { CardsAuditView } from './components/CardsAuditView';
 import { PixDetectorView } from './components/PixDetectorView';
 import { HousingTransitionView } from './components/HousingTransitionView';
 import { InvestmentsView } from './components/InvestmentsView';
+import { BudgetsMetasView } from './components/BudgetsMetasView';
+import { CreditCardsAdvancedView } from './components/CreditCardsAdvancedView';
+import { IPhoneCaptureEngineView } from './components/IPhoneCaptureEngineView';
 import { 
   Sparkles, 
   ArrowLeftRight, 
@@ -16,8 +19,8 @@ import {
   Building2, 
   TrendingUp,
   RotateCcw,
-  ShieldCheck,
-  CheckCircle2
+  Target,
+  Smartphone
 } from 'lucide-react';
 
 const API_BASE = '/api';
@@ -25,6 +28,7 @@ const API_BASE = '/api';
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedMonth, setSelectedMonth] = useState('2026-10');
+  const [period, setPeriod] = useState('CURRENT_MONTH');
   const [excludeAtypical, setExcludeAtypical] = useState(true);
   const [useNewApartment, setUseNewApartment] = useState(false);
 
@@ -35,11 +39,14 @@ export default function App() {
   const [summaryData, setSummaryData] = useState(null);
   const [fixedExpensesData, setFixedExpensesData] = useState([]);
   const [cardsAuditData, setCardsAuditData] = useState(null);
+  const [detailedCardsData, setDetailedCardsData] = useState([]);
+  const [budgetsData, setBudgetsData] = useState([]);
   const [pixData, setPixData] = useState(null);
   const [housingData, setHousingData] = useState(null);
   const [investmentsData, setInvestmentsData] = useState(null);
   const [wellhubData, setWellhubData] = useState(null);
   const [incomesData, setIncomesData] = useState([]);
+  const [smsHistoryData, setSmsHistoryData] = useState([]);
 
   // Fetch all data
   const fetchData = useCallback(async () => {
@@ -49,7 +56,7 @@ export default function App() {
 
       // Fetch summary with query params
       const summaryRes = await fetch(
-        `${API_BASE}/dashboard/summary?month=${selectedMonth}&excludeAtypical=${excludeAtypical}&useNewApartment=${useNewApartment}`
+        `${API_BASE}/dashboard/summary?month=${selectedMonth}&period=${period}&excludeAtypical=${excludeAtypical}&useNewApartment=${useNewApartment}`
       );
       const summaryJson = await summaryRes.json();
       setSummaryData(summaryJson);
@@ -57,54 +64,69 @@ export default function App() {
       // Parallel fetch for specific modules
       const [
         fixedRes,
-        cardsRes,
+        cardsAuditRes,
+        cardsDetailedRes,
+        budgetsRes,
         pixRes,
         housingRes,
         investRes,
         wellhubRes,
-        incomesRes
+        incomesRes,
+        smsHistoryRes
       ] = await Promise.all([
         fetch(`${API_BASE}/fixed-expenses?month=${selectedMonth}`),
         fetch(`${API_BASE}/cards/audit`),
+        fetch(`${API_BASE}/cards/detailed`),
+        fetch(`${API_BASE}/budgets`),
         fetch(`${API_BASE}/pix?month=${selectedMonth}`),
         fetch(`${API_BASE}/housing/simulation`),
         fetch(`${API_BASE}/investments`),
         fetch(`${API_BASE}/wellhub?month=${selectedMonth}`),
-        fetch(`${API_BASE}/incomes?month=${selectedMonth}`)
+        fetch(`${API_BASE}/incomes?month=${selectedMonth}`),
+        fetch(`${API_BASE}/sms/history`)
       ]);
 
       const [
         fixedJson,
-        cardsJson,
+        cardsAuditJson,
+        cardsDetailedJson,
+        budgetsJson,
         pixJson,
         housingJson,
         investJson,
         wellhubJson,
-        incomesJson
+        incomesJson,
+        smsHistoryJson
       ] = await Promise.all([
         fixedRes.json(),
-        cardsRes.json(),
+        cardsAuditRes.json(),
+        cardsDetailedRes.json(),
+        budgetsRes.json(),
         pixRes.json(),
         housingRes.json(),
         investRes.json(),
         wellhubRes.json(),
-        incomesRes.json()
+        incomesRes.json(),
+        smsHistoryRes.json()
       ]);
 
       setFixedExpensesData(fixedJson.expenses || []);
-      setCardsAuditData(cardsJson);
+      setCardsAuditData(cardsAuditJson);
+      setDetailedCardsData(cardsDetailedJson || []);
+      setBudgetsData(budgetsJson || []);
       setPixData(pixJson);
       setHousingData(housingJson);
       setInvestmentsData(investJson);
       setWellhubData(wellhubJson);
       setIncomesData(incomesJson);
+      setSmsHistoryData(smsHistoryJson || []);
     } catch (err) {
       console.error('Erro ao carregar dados do MobillsPro:', err);
       setError('Não foi possível conectar ao servidor. Verifique se o backend está em execução.');
     } finally {
       setLoading(false);
     }
-  }, [selectedMonth, excludeAtypical, useNewApartment]);
+  }, [selectedMonth, period, excludeAtypical, useNewApartment]);
 
   useEffect(() => {
     fetchData();
@@ -117,7 +139,6 @@ export default function App() {
         method: 'PATCH'
       });
       if (res.ok) {
-        // Optimistic / fast update
         fetchData();
       }
     } catch (err) {
@@ -136,6 +157,22 @@ export default function App() {
       }
     } catch (err) {
       console.error('Erro ao alternar atípico:', err);
+    }
+  };
+
+  // Update Budget (Meta)
+  const handleUpdateBudget = async (id, payload) => {
+    try {
+      const res = await fetch(`${API_BASE}/budgets/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        fetchData();
+      }
+    } catch (err) {
+      console.error('Erro ao atualizar meta orçamentária:', err);
     }
   };
 
@@ -198,7 +235,7 @@ export default function App() {
           </div>
         )}
 
-        {/* Tab Switcher Content */}
+        {/* Tab 1: Dashboard Principal */}
         {activeTab === 'dashboard' && (
           <DashboardView
             summaryData={summaryData}
@@ -208,9 +245,29 @@ export default function App() {
             setUseNewApartment={setUseNewApartment}
             setActiveTab={setActiveTab}
             onToggleFixedExpense={handleToggleFixedExpense}
+            period={period}
+            setPeriod={setPeriod}
+            fixedExpenses={fixedExpensesData}
+            cardTransactions={cardsAuditData?.transactions}
           />
         )}
 
+        {/* Tab 2: Metas & Orçamento por Centro de Custo (Padrão Mobills) */}
+        {activeTab === 'budgets' && (
+          <BudgetsMetasView
+            budgetsData={budgetsData}
+            onUpdateBudget={handleUpdateBudget}
+          />
+        )}
+
+        {/* Tab 3: Gestão Avançada de Cartões & Faturas */}
+        {activeTab === 'cards-advanced' && (
+          <CreditCardsAdvancedView
+            cardsData={detailedCardsData}
+          />
+        )}
+
+        {/* Tab 4: Divisão 50/50 & Receitas */}
         {activeTab === 'incomes' && (
           <DivisionIncomesView
             wellhubData={wellhubData}
@@ -219,6 +276,7 @@ export default function App() {
           />
         )}
 
+        {/* Tab 5: Checklist Despesas Fixas */}
         {activeTab === 'checklist' && (
           <FixedExpensesChecklist
             expenses={fixedExpensesData}
@@ -227,6 +285,7 @@ export default function App() {
           />
         )}
 
+        {/* Tab 6: Auditoria 6 Meses de Cartões & Supermercados */}
         {activeTab === 'cards' && (
           <CardsAuditView
             auditData={cardsAuditData}
@@ -236,12 +295,14 @@ export default function App() {
           />
         )}
 
+        {/* Tab 7: Detector Pix */}
         {activeTab === 'pix' && (
           <PixDetectorView
             pixData={pixData}
           />
         )}
 
+        {/* Tab 8: Transição Centro Caixa SBPE */}
         {activeTab === 'housing' && (
           <HousingTransitionView
             simulationData={housingData}
@@ -250,10 +311,19 @@ export default function App() {
           />
         )}
 
+        {/* Tab 9: Investimentos & Ativos (Nomad & Selic) */}
         {activeTab === 'investments' && (
           <InvestmentsView
             investmentsData={investmentsData}
             onUpdateInvestment={handleUpdateInvestment}
+          />
+        )}
+
+        {/* Tab 10: Motor de Captura Push/SMS iPhone 17 Pro Max */}
+        {activeTab === 'iphone' && (
+          <IPhoneCaptureEngineView
+            smsHistory={smsHistoryData}
+            onCaptureSms={fetchData}
           />
         )}
 
@@ -264,7 +334,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span>MobillsPro Produção v1.0 • Muriaé/MG</span>
+            <span>MobillsPro v2.0 Web Elite • Muriaé/MG</span>
             <span>•</span>
             <span className="text-gray-400">Alexandre & Amanda</span>
           </div>
@@ -279,7 +349,7 @@ export default function App() {
             </button>
             <span>•</span>
             <span className="text-emerald-400 font-mono">
-              PostgreSQL Ready & PWA Standalone
+              iPhone 17 Pro Max Push Ready & PWA
             </span>
           </div>
         </div>
@@ -289,48 +359,48 @@ export default function App() {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0B0F19]/95 backdrop-blur-lg border-t border-gray-800 px-2 py-1 flex justify-around">
         <button
           onClick={() => setActiveTab('dashboard')}
-          className={`flex flex-col items-center py-1 px-2 text-[10px] font-semibold ${
+          className={`flex flex-col items-center py-1 px-1.5 text-[10px] font-semibold ${
             activeTab === 'dashboard' ? 'text-emerald-400' : 'text-gray-400'
           }`}
         >
-          <Sparkles className="w-5 h-5 mb-0.5" />
+          <Sparkles className="w-4 h-4 mb-0.5" />
           Balanço
         </button>
         <button
+          onClick={() => setActiveTab('budgets')}
+          className={`flex flex-col items-center py-1 px-1.5 text-[10px] font-semibold ${
+            activeTab === 'budgets' ? 'text-emerald-400' : 'text-gray-400'
+          }`}
+        >
+          <Target className="w-4 h-4 mb-0.5" />
+          Metas
+        </button>
+        <button
+          onClick={() => setActiveTab('cards-advanced')}
+          className={`flex flex-col items-center py-1 px-1.5 text-[10px] font-semibold ${
+            activeTab === 'cards-advanced' ? 'text-emerald-400' : 'text-gray-400'
+          }`}
+        >
+          <CreditCard className="w-4 h-4 mb-0.5" />
+          Faturas
+        </button>
+        <button
           onClick={() => setActiveTab('checklist')}
-          className={`flex flex-col items-center py-1 px-2 text-[10px] font-semibold ${
+          className={`flex flex-col items-center py-1 px-1.5 text-[10px] font-semibold ${
             activeTab === 'checklist' ? 'text-emerald-400' : 'text-gray-400'
           }`}
         >
-          <CheckSquare className="w-5 h-5 mb-0.5" />
-          Checklist
+          <CheckSquare className="w-4 h-4 mb-0.5" />
+          Fixas
         </button>
         <button
-          onClick={() => setActiveTab('cards')}
-          className={`flex flex-col items-center py-1 px-2 text-[10px] font-semibold ${
-            activeTab === 'cards' ? 'text-emerald-400' : 'text-gray-400'
+          onClick={() => setActiveTab('iphone')}
+          className={`flex flex-col items-center py-1 px-1.5 text-[10px] font-semibold ${
+            activeTab === 'iphone' ? 'text-sky-400' : 'text-gray-400'
           }`}
         >
-          <CreditCard className="w-5 h-5 mb-0.5" />
-          Cartões
-        </button>
-        <button
-          onClick={() => setActiveTab('pix')}
-          className={`flex flex-col items-center py-1 px-2 text-[10px] font-semibold ${
-            activeTab === 'pix' ? 'text-emerald-400' : 'text-gray-400'
-          }`}
-        >
-          <Wallet className="w-5 h-5 mb-0.5" />
-          Pix
-        </button>
-        <button
-          onClick={() => setActiveTab('investments')}
-          className={`flex flex-col items-center py-1 px-2 text-[10px] font-semibold ${
-            activeTab === 'investments' ? 'text-emerald-400' : 'text-gray-400'
-          }`}
-        >
-          <TrendingUp className="w-5 h-5 mb-0.5" />
-          Ativos
+          <Smartphone className="w-4 h-4 mb-0.5" />
+          iPhone
         </button>
       </nav>
 

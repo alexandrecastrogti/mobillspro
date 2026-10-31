@@ -18,7 +18,6 @@ if (!fs.existsSync(DATA_DIR)) {
 let pgPool = null;
 let usePostgres = false;
 
-// Check if PostgreSQL is configured via env
 if (process.env.DATABASE_URL) {
   try {
     pgPool = new Pool({
@@ -31,7 +30,6 @@ if (process.env.DATABASE_URL) {
   }
 }
 
-// In-Memory state with File persistence fallback
 let state = null;
 
 function loadFromFile() {
@@ -39,16 +37,18 @@ function loadFromFile() {
     if (fs.existsSync(DATA_FILE)) {
       const content = fs.readFileSync(DATA_FILE, 'utf-8');
       state = JSON.parse(content);
-      console.log('[MobillsPro DB] Loaded database from persistent storage:', DATA_FILE);
+      // Ensure new collections exist in state if loaded from older json
+      if (!state.budgets) state.budgets = JSON.parse(JSON.stringify(initialData.budgets));
+      if (!state.cashFlowHistory) state.cashFlowHistory = JSON.parse(JSON.stringify(initialData.cashFlowHistory));
+      if (!state.netWorthHistory) state.netWorthHistory = JSON.parse(JSON.stringify(initialData.netWorthHistory));
+      if (!state.smsPushCaptures) state.smsPushCaptures = JSON.parse(JSON.stringify(initialData.smsPushCaptures));
       return;
     }
   } catch (err) {
     console.warn('[MobillsPro DB] Error reading JSON DB, fallback to initial seed:', err.message);
   }
-  // Initialize with seedData
   state = JSON.parse(JSON.stringify(initialData));
   saveToFile();
-  console.log('[MobillsPro DB] Initialized database with preloaded business rules & 6-month historical audit data.');
 }
 
 function saveToFile() {
@@ -59,16 +59,13 @@ function saveToFile() {
   }
 }
 
-// Initialize on module load
 loadFromFile();
 
 export const db = {
-  // Check if PG is active
   isPostgres() {
     return usePostgres;
   },
 
-  // Profile and Configuration
   getProfile() {
     return state.profile;
   },
@@ -79,7 +76,6 @@ export const db = {
     return state.profile;
   },
 
-  // Incomes
   getIncomes(month = "2026-10") {
     return state.incomes.filter(i => !i.referenceMonth || i.referenceMonth === month);
   },
@@ -95,24 +91,10 @@ export const db = {
     return newIncome;
   },
 
-  // Wellhub Reimbursements
   getWellhubReimbursements(month = "2026-10") {
     return state.wellhubReimbursements.filter(w => !w.referenceMonth || w.referenceMonth === month);
   },
 
-  addWellhubReimbursement(item) {
-    const newItem = {
-      id: `wh-${Date.now()}`,
-      ...item,
-      status: item.status || "CREDITADO",
-      referenceMonth: item.referenceMonth || state.profile.currentMonth
-    };
-    state.wellhubReimbursements.push(newItem);
-    saveToFile();
-    return newItem;
-  },
-
-  // Fixed Expenses & Checklist
   getFixedExpenses(month = "2026-10") {
     return state.fixedExpenses.filter(f => !f.referenceMonth || f.referenceMonth === month);
   },
@@ -120,7 +102,6 @@ export const db = {
   toggleFixedExpense(id) {
     const exp = state.fixedExpenses.find(f => f.id === id);
     if (!exp) return null;
-    
     if (exp.status === 'PAGO') {
       exp.status = 'PENDENTE';
       exp.paidAt = null;
@@ -152,7 +133,7 @@ export const db = {
     return newItem;
   },
 
-  // Credit Cards and 6-Month Historical Audit
+  // Credit Cards and Invoices with Timeline & Limits
   getCreditCardsAudit() {
     return {
       cards: state.creditCards,
@@ -160,6 +141,24 @@ export const db = {
       supermarketBenchmark: state.supermarketBenchmark,
       transactions: state.cardTransactions
     };
+  },
+
+  getCreditCardsDetailed() {
+    return state.creditCards.map(c => {
+      const limitUsedPercent = Number(((c.usedLimit / c.creditLimit) * 100).toFixed(1));
+      let limitRisk = "HEALTHY";
+      if (limitUsedPercent > 70) limitRisk = "WARNING";
+      if (limitUsedPercent > 85) limitRisk = "CRITICAL";
+
+      return {
+        ...c,
+        limitUsedPercent,
+        limitRisk,
+        closingDate: `2026-10-${String(c.closingDay).padStart(2, '0')}`,
+        dueDate: c.dueDay === 1 ? '2026-11-01' : `2026-10-${String(c.dueDay).padStart(2, '0')}`,
+        bestBuyDate: `2026-10-${String(c.bestBuyDay).padStart(2, '0')}`
+      };
+    });
   },
 
   getCardTransactions(month = "2026-10", cardId = null) {
@@ -181,20 +180,127 @@ export const db = {
     return tx;
   },
 
-  addCardTransaction(item) {
-    const newItem = {
-      id: `tx-c-${Date.now()}`,
-      referenceMonth: item.referenceMonth || state.profile.currentMonth,
-      isAtypical: !!item.isAtypical,
-      isShared: item.isShared !== undefined ? item.isShared : true,
-      ...item
-    };
-    state.cardTransactions.push(newItem);
-    saveToFile();
-    return newItem;
+  // Budgets & Centros de Custo (Metas)
+  getBudgets() {
+    return state.budgets.map(b => {
+      const remaining = Number((b.targetAmount - b.spentAmount).toFixed(2));
+      const percentage = Number(((b.spentAmount / b.targetAmount) * 100).toFixed(1));
+      
+      let colorCode = "GREEN";
+      let status = "OK";
+      if (percentage > 75 && percentage <= 90) {
+        colorCode = "YELLOW";
+        status = "WARN";
+      } else if (percentage > 90) {
+        colorCode = "RED";
+        status = "ALERT";
+      }
+
+      return {
+        ...b,
+        remaining,
+        percentage,
+        colorCode,
+        status,
+        isOverBudget: remaining < 0
+      };
+    });
   },
 
-  // Pix Transactions (Detector and Alerts)
+  updateBudget(id, updates) {
+    const index = state.budgets.findIndex(b => b.id === id);
+    if (index === -1) return null;
+    state.budgets[index] = { ...state.budgets[index], ...updates };
+    saveToFile();
+    return state.budgets[index];
+  },
+
+  // Motor de Captura SMS / Push (iPhone 17 Pro Max)
+  getSmsPushHistory() {
+    return state.smsPushCaptures || [];
+  },
+
+  parseAndRecordSmsPush(rawText, source = "iPhone 17 Pro Max Push") {
+    // Regex parsing for bank SMS / push
+    // Examples:
+    // "Compra de R$ 85,00 aprovada no Nubank em BAHAMAS MIX MURIAE"
+    // "Pix enviado com sucesso! R$ 45,00 para DEMSUR MURIAE AGUA"
+    // "Bradesco Cartoes: Compra aprovada de R$ 240,00 no POSTO FAISAO MURIAE"
+
+    let detectedAmount = 0;
+    const amountMatch = rawText.match(/R\$\s*([\d\.,]+)/i);
+    if (amountMatch) {
+      const cleanStr = amountMatch[1].replace('.', '').replace(',', '.');
+      detectedAmount = parseFloat(cleanStr) || 0;
+    }
+
+    let detectedMerchant = "Estabelecimento Comercial Muriaé";
+    if (/bahamas/i.test(rawText)) detectedMerchant = "Bahamas Mix Muriaé";
+    else if (/supermercados bh|bh muriae/i.test(rawText)) detectedMerchant = "Supermercados BH Muriaé";
+    else if (/top frut/i.test(rawText)) detectedMerchant = "Top Frut Gourmet Muriaé";
+    else if (/faisao/i.test(rawText)) detectedMerchant = "Posto Faisão Muriaé";
+    else if (/posto dm/i.test(rawText)) detectedMerchant = "Posto DM Combustíveis";
+    else if (/indiana/i.test(rawText)) detectedMerchant = "Farmácia Indiana Muriaé";
+    else if (/demsur/i.test(rawText)) detectedMerchant = "DEMSUR Muriaé Água";
+    else if (/energisa/i.test(rawText)) detectedMerchant = "Energisa Muriaé";
+    else if (/unimed/i.test(rawText)) detectedMerchant = "Unimed Muriaé";
+
+    let detectedCard = "Cartão de Crédito";
+    if (/nubank/i.test(rawText)) detectedCard = "Nubank Ultravioleta";
+    else if (/bradesco/i.test(rawText)) detectedCard = "Bradesco Visa Platinum";
+    else if (/mercado pago/i.test(rawText)) detectedCard = "Mercado Pago Visa";
+    else if (/pix/i.test(rawText)) detectedCard = "Pix Direto Conta";
+
+    let assignedCategory = "Outros / Diversos";
+    if (/bahamas|bh|top frut|mercado/i.test(detectedMerchant)) assignedCategory = "Supermercados Muriaé";
+    else if (/faisao|dm|combustivel/i.test(detectedMerchant)) assignedCategory = "Combustível & Transporte";
+    else if (/indiana|drogaria/i.test(detectedMerchant)) assignedCategory = "Farmácia & Medicamentos";
+    else if (/demsur|energisa|fibra/i.test(detectedMerchant)) assignedCategory = "Contas de Consumo";
+    else if (/unimed/i.test(detectedMerchant)) assignedCategory = "Saúde Individual (Alexandre)";
+
+    const newCapture = {
+      id: `sms-${Date.now()}`,
+      source,
+      rawText,
+      parsedAmount: detectedAmount,
+      parsedMerchant: detectedMerchant,
+      detectedCard,
+      assignedCategory,
+      capturedAt: new Date().toISOString(),
+      status: "SYNCED",
+      device: "iPhone 17 Pro Max"
+    };
+
+    if (!state.smsPushCaptures) state.smsPushCaptures = [];
+    state.smsPushCaptures.unshift(newCapture);
+
+    // If it's a card purchase, also append to cardTransactions
+    if (detectedCard !== "Pix Direto Conta" && detectedAmount > 0) {
+      let cardId = "card-nubank";
+      if (/bradesco/i.test(detectedCard)) cardId = "card-bradesco";
+      if (/mercado pago/i.test(detectedCard)) cardId = "card-mercadopago";
+
+      state.cardTransactions.push({
+        id: `tx-c-${Date.now()}`,
+        cardId,
+        cardName: detectedCard,
+        establishment: detectedMerchant,
+        category: assignedCategory,
+        amount: detectedAmount,
+        transactionDate: new Date().toISOString().split('T')[0],
+        installmentInfo: "Captura Automática iPhone",
+        isAtypical: false,
+        atypicalReason: null,
+        referenceMonth: "2026-10",
+        isShared: true
+      });
+    }
+
+    saveToFile();
+    return newCapture;
+  },
+
+  // Pix Transactions
   getPixTransactions(month = "2026-10") {
     let list = state.pixTransactions;
     if (month) {
@@ -216,7 +322,7 @@ export const db = {
     return newItem;
   },
 
-  // Housing Transition Simulator (Caixa SBPE SAC Centro vs Atual)
+  // Housing Simulation
   getHousingSimulation() {
     return state.housingSimulation;
   },
@@ -242,7 +348,6 @@ export const db = {
     const current = state.investments[index];
     const updated = { ...current, ...updates, lastUpdated: new Date().toISOString().split('T')[0] };
     
-    // Auto calculate balanceBRL if original or exchangeRate changes
     if (updated.currency === 'USD') {
       const rate = updated.exchangeRate || 5.75;
       updated.balanceBRL = Number((updated.balanceOriginal * rate).toFixed(2));
@@ -255,34 +360,25 @@ export const db = {
     return updated;
   },
 
-  addInvestment(item) {
-    const rate = item.currency === 'USD' ? (item.exchangeRate || 5.75) : 1;
-    const newItem = {
-      id: `inv-${Date.now()}`,
-      lastUpdated: new Date().toISOString().split('T')[0],
-      exchangeRate: rate,
-      balanceBRL: Number((item.balanceOriginal * rate).toFixed(2)),
-      ...item
-    };
-    state.investments.push(newItem);
-    saveToFile();
-    return newItem;
+  // Analytics: Cashflow & Net Worth History
+  getCashFlowHistory() {
+    return state.cashFlowHistory || [];
+  },
+
+  getNetWorthHistory() {
+    return state.netWorthHistory || [];
   },
 
   // Smart Balance Automation: Magic Number (Saldo Livre Real)
-  calculateMagicNumber(month = "2026-10", excludeAtypical = true, useNewApartment = false) {
-    // 1. Incomes Alexandre
+  calculateMagicNumber(month = "2026-10", excludeAtypical = true, useNewApartment = false, period = "CURRENT_MONTH") {
     const incomes = this.getIncomes(month);
     const totalIncomeAlexandre = incomes.reduce((acc, curr) => acc + Number(curr.amount), 0);
 
-    // 2. Wellhub Reimbursements (Credit)
     const wellhubs = this.getWellhubReimbursements(month);
     const totalWellhubCredit = wellhubs.reduce((acc, curr) => acc + Number(curr.amount), 0);
 
-    // Total Inflow for Alexandre
     const totalAvailableAlexandre = totalIncomeAlexandre + totalWellhubCredit;
 
-    // 3. Fixed Expenses Checklist
     const fixed = this.getFixedExpenses(month);
     const totalFixedAlexandre = fixed.reduce((acc, curr) => acc + Number(curr.alexandreShare), 0);
     const fixedPaidAlexandre = fixed
@@ -292,7 +388,6 @@ export const db = {
       .filter(f => f.status === 'PENDENTE')
       .reduce((acc, curr) => acc + Number(curr.alexandreShare), 0);
 
-    // Individual vs Shared breakdown for Alexandre
     const fixedIndividualAlexandre = fixed
       .filter(f => !f.isSplit5050 && f.beneficiary === 'ALEXANDRE')
       .reduce((acc, curr) => acc + Number(curr.alexandreShare), 0);
@@ -300,14 +395,12 @@ export const db = {
       .filter(f => f.isSplit5050)
       .reduce((acc, curr) => acc + Number(curr.alexandreShare), 0);
 
-    // 4. Cards
     const cards = this.getCardTransactions(month);
     let eligibleCards = cards;
     if (excludeAtypical) {
       eligibleCards = cards.filter(c => !c.isAtypical);
     }
     
-    // Alexandre's share in cards (50% of shared, 100% of individual)
     const cardAlexandreTotal = eligibleCards.reduce((acc, curr) => {
       const share = curr.isShared ? (Number(curr.amount) / 2) : Number(curr.amount);
       return acc + share;
@@ -317,34 +410,42 @@ export const db = {
       .filter(c => c.isAtypical)
       .reduce((acc, curr) => acc + (curr.isShared ? (Number(curr.amount) / 2) : Number(curr.amount)), 0);
 
-    // 5. Pix Outflows (not already accounted in fixed expenses checklist)
     const pixList = this.getPixTransactions(month);
     const pixOutflowsExtra = pixList
-      .filter(p => p.direction === 'SAIDA' && p.isAlert) // Extra / avulsos
+      .filter(p => p.direction === 'SAIDA' && p.isAlert)
       .reduce((acc, curr) => acc + Number(curr.amount), 0);
 
-    // 6. Housing adjustment (if switching to New Apartment)
     let housingAdjustment = 0;
     const sim = state.housingSimulation;
     if (useNewApartment) {
-      // Delta = New housing cost (SAC + Condo - Fuel Savings) - Current housing cost (Rent + Land)
-      const currentHousingCost = sim.current.rentShare + sim.current.landShare; // 810.50 + 1343.26 = 2153.76
-      const newHousingCost = sim.newCenterApartment.caixaSacFirstInstallment + sim.newCenterApartment.condoShare - sim.newCenterApartment.fuelSavings; // 3231.32 + 250 - 360 = 3121.32
+      const currentHousingCost = sim.current.rentShare + sim.current.landShare;
+      const newHousingCost = sim.newCenterApartment.caixaSacFirstInstallment + sim.newCenterApartment.condoShare - sim.newCenterApartment.fuelSavings;
       housingAdjustment = newHousingCost - currentHousingCost;
     }
 
-    // Magic Number Calculation
     const magicNumber = totalAvailableAlexandre - totalFixedAlexandre - cardAlexandreTotal - pixOutflowsExtra - housingAdjustment;
 
-    // Financial Health Indicators
+    // Despesas Totais consolidadas
+    const totalExpensesMonth = totalFixedAlexandre + cardAlexandreTotal + pixOutflowsExtra + (useNewApartment ? housingAdjustment : 0);
+
+    // Projeção Anual (12 Meses)
+    const annualProjectedSavings = Number((magicNumber * 12).toFixed(2));
+    const annualProjectedIncome = Number((totalAvailableAlexandre * 12).toFixed(2));
+
     const savingsRate = ((magicNumber / totalAvailableAlexandre) * 100).toFixed(1);
     const fixedCommitment = ((totalFixedAlexandre / totalAvailableAlexandre) * 100).toFixed(1);
 
     return {
       referenceMonth: month,
+      period,
       totalIncomeAlexandre,
       totalWellhubCredit,
       totalAvailableAlexandre,
+      totalExpensesMonth: Number(totalExpensesMonth.toFixed(2)),
+      annualProjection: {
+        savings: annualProjectedSavings,
+        income: annualProjectedIncome
+      },
       fixedExpenses: {
         total: totalFixedAlexandre,
         paid: fixedPaidAlexandre,
@@ -371,7 +472,6 @@ export const db = {
     };
   },
 
-  // Reset to initial seed data
   resetDatabase() {
     state = JSON.parse(JSON.stringify(initialData));
     saveToFile();

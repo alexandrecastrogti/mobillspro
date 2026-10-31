@@ -66,3 +66,4 @@ INSERT INTO investments (account_name, institution, asset_type, currency, balanc
 ('Tesouro Selic 2029', 'Tesouro Direto / Itaú', 'RENDA_FIXA_POS', 'BRL', 35000.00, 1.0000, 35000.00, '13.75% a.a. (Taxa Selic Meta)', 375.00, '2026-10-31'),
 ('CDB 110% CDI Liquidez Diária', 'Nubank / Bradesco', 'RENDA_FIXA_POS', 'BRL', 18450.00, 1.0000, 18450.00, '15.12% a.a. (110% do CDI)', 215.00, '2026-10-31'),
 ('Terreno Residencial Muriaé (Fração Paga)', 'Loteadora Muriaé', 'PATRIMONIO_IMOVEL', 'BRL', 48500.00, 1.0000, 48500.00, 'Apreciação imobiliária ~10% a.a.', 0.00, '2026-10-31');
+

@@ -27,20 +27,21 @@ router.put('/profile', (req, res) => {
 // Dashboard Summary & Real-time Magic Number
 router.get('/dashboard/summary', (req, res) => {
   const month = req.query.month || '2026-10';
+  const period = req.query.period || 'CURRENT_MONTH';
   const excludeAtypical = req.query.excludeAtypical !== 'false';
   const useNewApartment = req.query.useNewApartment === 'true';
 
-  const balance = db.calculateMagicNumber(month, excludeAtypical, useNewApartment);
+  const balance = db.calculateMagicNumber(month, excludeAtypical, useNewApartment, period);
   const profile = db.getProfile();
   const investments = db.getInvestments();
   const cardsAudit = db.getCreditCardsAudit();
   const pixList = db.getPixTransactions(month);
+  const cashflow = db.getCashFlowHistory();
+  const networthHistory = db.getNetWorthHistory();
+  const budgets = db.getBudgets();
 
-  // Total Net Worth (Patrimônio Líquido Consolidado)
   const totalNetWorthBRL = investments.reduce((acc, curr) => acc + Number(curr.balanceBRL), 0);
   const nomadAsset = investments.find(i => i.assetType === 'USD_OFFSHORE');
-
-  // Pix Alerts
   const pixAlerts = pixList.filter(p => p.isAlert);
 
   res.json({
@@ -55,91 +56,33 @@ router.get('/dashboard/summary', (req, res) => {
       selicRate: "13.75% a.a."
     },
     pixAlertsCount: pixAlerts.length,
-    recentPixAlerts: pixAlerts.slice(0, 3)
-  });
-});
-
-// Incomes
-router.get('/incomes', (req, res) => {
-  const month = req.query.month || '2026-10';
-  res.json(db.getIncomes(month));
-});
-
-router.post('/incomes', (req, res) => {
-  const item = db.addIncome(req.body);
-  res.status(201).json(item);
-});
-
-// Wellhub Reimbursements
-router.get('/wellhub', (req, res) => {
-  const month = req.query.month || '2026-10';
-  const reimbursements = db.getWellhubReimbursements(month);
-  const total = reimbursements.reduce((acc, curr) => acc + Number(curr.amount), 0);
-  res.json({
-    reimbursements,
-    total,
-    rule: "Reembolso automático de terceiros (Amanda, Taiana, Nilvana) de R$ 549,90 creditado mensalmente"
-  });
-});
-
-router.post('/wellhub', (req, res) => {
-  const item = db.addWellhubReimbursement(req.body);
-  res.status(201).json(item);
-});
-
-// Fixed Expenses & Checklist
-router.get('/fixed-expenses', (req, res) => {
-  const month = req.query.month || '2026-10';
-  const expenses = db.getFixedExpenses(month);
-  
-  const totalShared = expenses
-    .filter(e => e.isSplit5050)
-    .reduce((acc, curr) => acc + Number(curr.alexandreShare), 0);
-  
-  const totalIndividual = expenses
-    .filter(e => !e.isSplit5050)
-    .reduce((acc, curr) => acc + Number(curr.alexandreShare), 0);
-
-  const totalPaid = expenses
-    .filter(e => e.status === 'PAGO')
-    .reduce((acc, curr) => acc + Number(curr.alexandreShare), 0);
-
-  const totalPending = expenses
-    .filter(e => e.status === 'PENDENTE')
-    .reduce((acc, curr) => acc + Number(curr.alexandreShare), 0);
-
-  res.json({
-    expenses,
-    summary: {
-      totalAlexandre: totalShared + totalIndividual,
-      totalShared,
-      totalIndividual,
-      totalPaid,
-      totalPending,
-      paidCount: expenses.filter(e => e.status === 'PAGO').length,
-      pendingCount: expenses.filter(e => e.status === 'PENDENTE').length
+    recentPixAlerts: pixAlerts.slice(0, 3),
+    cashflow,
+    networthHistory,
+    budgetsOverview: {
+      totalTarget: budgets.reduce((a, b) => a + b.targetAmount, 0),
+      totalSpent: budgets.reduce((a, b) => a + b.spentAmount, 0),
+      alertsCount: budgets.filter(b => b.status === 'ALERT').length
     }
   });
 });
 
-router.patch('/fixed-expenses/:id/toggle', (req, res) => {
-  const updated = db.toggleFixedExpense(req.params.id);
-  if (!updated) return res.status(404).json({ error: "Despesa fixa não encontrada" });
+// Budgets (Metas por Centro de Custo)
+router.get('/budgets', (req, res) => {
+  res.json(db.getBudgets());
+});
+
+router.put('/budgets/:id', (req, res) => {
+  const updated = db.updateBudget(req.params.id, req.body);
+  if (!updated) return res.status(404).json({ error: "Meta não encontrada" });
   res.json(updated);
 });
 
-router.put('/fixed-expenses/:id', (req, res) => {
-  const updated = db.updateFixedExpense(req.params.id, req.body);
-  if (!updated) return res.status(404).json({ error: "Despesa fixa não encontrada" });
-  res.json(updated);
+// Credit Cards Detailed (Invoices, Timeline, Limits)
+router.get('/cards/detailed', (req, res) => {
+  res.json(db.getCreditCardsDetailed());
 });
 
-router.post('/fixed-expenses', (req, res) => {
-  const item = db.addFixedExpense(req.body);
-  res.status(201).json(item);
-});
-
-// Credit Cards & Historical Audit (Maio a Outubro de 2026)
 router.get('/cards/audit', (req, res) => {
   res.json(db.getCreditCardsAudit());
 });
@@ -156,44 +99,78 @@ router.patch('/cards/transactions/:id/toggle-atypical', (req, res) => {
   res.json(updated);
 });
 
-router.post('/cards/transactions', (req, res) => {
-  const item = db.addCardTransaction(req.body);
-  res.status(201).json(item);
+// iPhone 17 Pro Max Push / SMS Capture Engine & Apple Shortcuts Webhook
+router.get('/sms/history', (req, res) => {
+  res.json(db.getSmsPushHistory());
 });
 
-// Pix Transactions (Detector e Alertas)
-router.get('/pix', (req, res) => {
-  const month = req.query.month || '2026-10';
-  const transactions = db.getPixTransactions(month);
-  
-  const totalIn = transactions
-    .filter(t => t.direction === 'ENTRADA')
-    .reduce((acc, curr) => acc + Number(curr.amount), 0);
+router.post('/sms/parse', (req, res) => {
+  const { text, source } = req.body;
+  if (!text) {
+    return res.status(400).json({ error: "Texto da notificação / SMS não fornecido" });
+  }
+  const result = db.parseAndRecordSmsPush(text, source || "iPhone 17 Pro Max Simulator");
+  res.status(201).json(result);
+});
 
-  const totalOut = transactions
-    .filter(t => t.direction === 'SAIDA')
-    .reduce((acc, curr) => acc + Number(curr.amount), 0);
-
-  const alerts = transactions.filter(t => t.isAlert);
-
-  res.json({
-    transactions,
-    summary: {
-      totalIn,
-      totalOut,
-      netFlow: totalIn - totalOut,
-      alertsCount: alerts.length,
-      alerts
-    }
+// Webhook endpoint specifically designed for Apple Shortcuts (iOS Shortcuts)
+router.post('/shortcuts/webhook', (req, res) => {
+  const rawText = req.body.message || req.body.text || req.body.body || JSON.stringify(req.body);
+  const result = db.parseAndRecordSmsPush(rawText, "Apple Shortcuts (iPhone 17 Pro Max)");
+  res.status(201).json({
+    status: "SUCCESS",
+    message: "Capturado e sincronizado no MobillsPro",
+    capture: result
   });
 });
 
-router.post('/pix', (req, res) => {
-  const item = db.addPixTransaction(req.body);
-  res.status(201).json(item);
+// Analytics (Cashflow & Net Worth)
+router.get('/analytics/cashflow', (req, res) => {
+  res.json(db.getCashFlowHistory());
 });
 
-// Housing Transition Simulator (Moradia Atual vs Centro Caixa SBPE SAC)
+router.get('/analytics/networth', (req, res) => {
+  res.json(db.getNetWorthHistory());
+});
+
+// Incomes
+router.get('/incomes', (req, res) => {
+  const month = req.query.month || '2026-10';
+  res.json(db.getIncomes(month));
+});
+
+// Wellhub
+router.get('/wellhub', (req, res) => {
+  const month = req.query.month || '2026-10';
+  const reimbursements = db.getWellhubReimbursements(month);
+  const total = reimbursements.reduce((acc, curr) => acc + Number(curr.amount), 0);
+  res.json({ reimbursements, total });
+});
+
+// Fixed Expenses
+router.get('/fixed-expenses', (req, res) => {
+  const month = req.query.month || '2026-10';
+  const expenses = db.getFixedExpenses(month);
+  res.json({ expenses });
+});
+
+router.patch('/fixed-expenses/:id/toggle', (req, res) => {
+  const updated = db.toggleFixedExpense(req.params.id);
+  if (!updated) return res.status(404).json({ error: "Despesa fixa não encontrada" });
+  res.json(updated);
+});
+
+// Pix Transactions
+router.get('/pix', (req, res) => {
+  const month = req.query.month || '2026-10';
+  const transactions = db.getPixTransactions(month);
+  const totalIn = transactions.filter(t => t.direction === 'ENTRADA').reduce((a, b) => a + Number(b.amount), 0);
+  const totalOut = transactions.filter(t => t.direction === 'SAIDA').reduce((a, b) => a + Number(b.amount), 0);
+  const alerts = transactions.filter(t => t.isAlert);
+  res.json({ transactions, summary: { totalIn, totalOut, netFlow: totalIn - totalOut, alertsCount: alerts.length, alerts } });
+});
+
+// Housing Simulation
 router.get('/housing/simulation', (req, res) => {
   res.json(db.getHousingSimulation());
 });
@@ -203,29 +180,14 @@ router.put('/housing/simulation', (req, res) => {
   res.json(updated);
 });
 
-// Investments & Assets (Nomad USD, Tesouro Selic 13.75%, CDB)
+// Investments
 router.get('/investments', (req, res) => {
   const list = db.getInvestments();
   const totalNetWorthBRL = list.reduce((acc, curr) => acc + Number(curr.balanceBRL), 0);
-  const totalOffshoreUSD = list
-    .filter(i => i.assetType === 'USD_OFFSHORE')
-    .reduce((acc, curr) => acc + Number(curr.balanceOriginal), 0);
-  const totalFixedIncomeBRL = list
-    .filter(i => i.assetType === 'RENDA_FIXA_POS')
-    .reduce((acc, curr) => acc + Number(curr.balanceBRL), 0);
-  const totalRealEstateBRL = list
-    .filter(i => i.assetType === 'PATRIMONIO_IMOVEL')
-    .reduce((acc, curr) => acc + Number(curr.balanceBRL), 0);
-
-  res.json({
-    investments: list,
-    summary: {
-      totalNetWorthBRL,
-      totalOffshoreUSD,
-      totalFixedIncomeBRL,
-      totalRealEstateBRL
-    }
-  });
+  const totalOffshoreUSD = list.filter(i => i.assetType === 'USD_OFFSHORE').reduce((a, b) => a + Number(b.balanceOriginal), 0);
+  const totalFixedIncomeBRL = list.filter(i => i.assetType === 'RENDA_FIXA_POS').reduce((a, b) => a + Number(b.balanceBRL), 0);
+  const totalRealEstateBRL = list.filter(i => i.assetType === 'PATRIMONIO_IMOVEL').reduce((a, b) => a + Number(b.balanceBRL), 0);
+  res.json({ investments: list, summary: { totalNetWorthBRL, totalOffshoreUSD, totalFixedIncomeBRL, totalRealEstateBRL } });
 });
 
 router.put('/investments/:id', (req, res) => {
@@ -234,12 +196,7 @@ router.put('/investments/:id', (req, res) => {
   res.json(updated);
 });
 
-router.post('/investments', (req, res) => {
-  const item = db.addInvestment(req.body);
-  res.status(201).json(item);
-});
-
-// Reset database to initial state
+// Reset
 router.post('/system/reset', (req, res) => {
   const result = db.resetDatabase();
   res.json(result);

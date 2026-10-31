@@ -77,3 +77,4 @@ Inicia o backend na porta `3001` e o Vite Dev Server na porta `5173`.
 1. Abra o navegador do celular no endereço da aplicação.
 2. Toque no menu de opções e selecione **"Adicionar à tela de início"**.
 3. O MobillsPro funcionará como um aplicativo nativo full-screen.
+

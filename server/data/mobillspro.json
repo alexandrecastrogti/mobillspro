@@ -501,6 +501,20 @@
       "atypicalReason": null,
       "referenceMonth": "2026-10",
       "isShared": true
+    },
+    {
+      "id": "tx-c-1793473868927",
+      "cardId": "card-nubank",
+      "cardName": "Nubank Ultravioleta",
+      "establishment": "Bahamas Mix Muriaé",
+      "category": "Supermercados Muriaé",
+      "amount": 85,
+      "transactionDate": "2026-10-31",
+      "installmentInfo": "Captura Automática iPhone",
+      "isAtypical": false,
+      "atypicalReason": null,
+      "referenceMonth": "2026-10",
+      "isShared": true
     }
   ],
   "pixTransactions": [
@@ -743,6 +757,250 @@
           "valueBRL": 48500
         }
       ]
+    }
+  ],
+  "budgets": [
+    {
+      "id": "bg-1",
+      "category": "Supermercados Muriaé",
+      "description": "Supermercados BH + Bahamas Mix + Top Frut Gourmet",
+      "targetAmount": 1550,
+      "spentAmount": 2600.1,
+      "percentage": 167.7,
+      "status": "ALERT",
+      "alertNote": "Estourou a meta em R$ 1.050,10 devido a compras volumosas de despensa em Outubro.",
+      "shared5050": true
+    },
+    {
+      "id": "bg-2",
+      "category": "Moradia & Habitação",
+      "description": "Aluguel Atual + Taxa de Condomínio",
+      "targetAmount": 880.5,
+      "spentAmount": 880.5,
+      "percentage": 100,
+      "status": "WARN",
+      "alertNote": "No limite programado. Será substituído na transição para o Centro.",
+      "shared5050": true
+    },
+    {
+      "id": "bg-3",
+      "category": "Prestação do Terreno",
+      "description": "Loteamento Residencial Muriaé",
+      "targetAmount": 1343.26,
+      "spentAmount": 1343.26,
+      "percentage": 100,
+      "status": "WARN",
+      "alertNote": "Parcela fixa patrimonial em dia.",
+      "shared5050": true
+    },
+    {
+      "id": "bg-4",
+      "category": "Combustível & Transporte",
+      "description": "Posto Faisão Muriaé + Posto DM",
+      "targetAmount": 480,
+      "spentAmount": 480,
+      "percentage": 100,
+      "status": "WARN",
+      "alertNote": "Cai para R$ 120,00/mês com a mudança para o Centro de Muriaé (-R$ 360 de economia).",
+      "shared5050": true
+    },
+    {
+      "id": "bg-5",
+      "category": "Saúde Individual (Alexandre)",
+      "description": "Unimed Plano Individual Completo",
+      "targetAmount": 500,
+      "spentAmount": 485,
+      "percentage": 97,
+      "status": "WARN",
+      "alertNote": "Despesa 100% individual de Alexandre (não entra no 50/50).",
+      "shared5050": false
+    },
+    {
+      "id": "bg-6",
+      "category": "Serviços Domésticos",
+      "description": "Faxina quinzenal residência Muriaé",
+      "targetAmount": 200,
+      "spentAmount": 180,
+      "percentage": 90,
+      "status": "WARN",
+      "alertNote": "Metade Alexandre (total R$ 360,00).",
+      "shared5050": true
+    },
+    {
+      "id": "bg-7",
+      "category": "Contas de Consumo",
+      "description": "Energisa Muriaé + Fibra Óptica + DEMSUR Água",
+      "targetAmount": 350,
+      "spentAmount": 300,
+      "percentage": 85.7,
+      "status": "WARN",
+      "alertNote": "Consumo moderado de energia e água no mês.",
+      "shared5050": true
+    },
+    {
+      "id": "bg-8",
+      "category": "Alimentação Fora & Restaurantes",
+      "description": "Churrascaria, Pizzaria e Padaria Muriaé",
+      "targetAmount": 400,
+      "spentAmount": 320,
+      "percentage": 80,
+      "status": "WARN",
+      "alertNote": "Dentro do limite planejado para o lazer do casal.",
+      "shared5050": true
+    },
+    {
+      "id": "bg-9",
+      "category": "Saúde & Fitness (Alexandre)",
+      "description": "Academia Performance Muriaé",
+      "targetAmount": 150,
+      "spentAmount": 140,
+      "percentage": 93.3,
+      "status": "WARN",
+      "alertNote": "Mensalidade individual Alexandre.",
+      "shared5050": false
+    },
+    {
+      "id": "bg-10",
+      "category": "Farmácia & Medicamentos",
+      "description": "Farmácia Indiana Muriaé",
+      "targetAmount": 200,
+      "spentAmount": 110.9,
+      "percentage": 55.5,
+      "status": "OK",
+      "alertNote": "Meta bem controlada com economia de R$ 89,10.",
+      "shared5050": true
+    }
+  ],
+  "cashFlowHistory": [
+    {
+      "month": "2026-05",
+      "label": "Maio",
+      "inflow": 11646.11,
+      "outflow": 5794.56,
+      "balance": 5851.55
+    },
+    {
+      "month": "2026-06",
+      "label": "Junho",
+      "inflow": 11646.11,
+      "outflow": 5744.26,
+      "balance": 5901.85
+    },
+    {
+      "month": "2026-07",
+      "label": "Julho",
+      "inflow": 11646.11,
+      "outflow": 5864.76,
+      "balance": 5781.35
+    },
+    {
+      "month": "2026-08",
+      "label": "Agosto",
+      "inflow": 11646.11,
+      "outflow": 5853.76,
+      "balance": 5792.35
+    },
+    {
+      "month": "2026-09",
+      "label": "Setembro",
+      "inflow": 11646.11,
+      "outflow": 5794.06,
+      "balance": 5852.05
+    },
+    {
+      "month": "2026-10",
+      "label": "Outubro",
+      "inflow": 11646.11,
+      "outflow": 5334.26,
+      "balance": 6311.85
+    }
+  ],
+  "netWorthHistory": [
+    {
+      "month": "2026-05",
+      "label": "Maio",
+      "totalBRL": 98400,
+      "nomadUSD": 3100
+    },
+    {
+      "month": "2026-06",
+      "label": "Junho",
+      "totalBRL": 104200,
+      "nomadUSD": 3350
+    },
+    {
+      "month": "2026-07",
+      "label": "Julho",
+      "totalBRL": 109800,
+      "nomadUSD": 3600
+    },
+    {
+      "month": "2026-08",
+      "label": "Agosto",
+      "totalBRL": 115400,
+      "nomadUSD": 3850
+    },
+    {
+      "month": "2026-09",
+      "label": "Setembro",
+      "totalBRL": 120900,
+      "nomadUSD": 4050
+    },
+    {
+      "month": "2026-10",
+      "label": "Outubro",
+      "totalBRL": 126387.5,
+      "nomadUSD": 4250
+    }
+  ],
+  "smsPushCaptures": [
+    {
+      "id": "sms-1793473868926",
+      "source": "iPhone 17 Pro Max Simulator",
+      "rawText": "Compra de R$ 85,00 aprovada no Nubank em BAHAMAS MIX MURIAE",
+      "parsedAmount": 85,
+      "parsedMerchant": "Bahamas Mix Muriaé",
+      "detectedCard": "Nubank Ultravioleta",
+      "assignedCategory": "Supermercados Muriaé",
+      "capturedAt": "2026-10-31T19:11:08.926Z",
+      "status": "SYNCED",
+      "device": "iPhone 17 Pro Max"
+    },
+    {
+      "id": "sms-1",
+      "source": "Nubank Push",
+      "rawText": "Compra de R$ 68,90 aprovada no Nubank em TOP FRUT GOURMET MURIAE",
+      "parsedAmount": 68.9,
+      "parsedMerchant": "Top Frut Gourmet Muriaé",
+      "detectedCard": "Nubank Ultravioleta",
+      "assignedCategory": "Supermercados Muriaé",
+      "capturedAt": "2026-10-31T11:42:00Z",
+      "status": "SYNCED",
+      "device": "iPhone 17 Pro Max"
+    },
+    {
+      "id": "sms-2",
+      "source": "Bradesco SMS",
+      "rawText": "Bradesco Cartoes: Compra aprovada de R$ 120,00 no POSTO FAISAO MURIAE em 31/10 as 09:15.",
+      "parsedAmount": 120,
+      "parsedMerchant": "Posto Faisão Muriaé",
+      "detectedCard": "Bradesco Visa Platinum",
+      "assignedCategory": "Combustível & Transporte",
+      "capturedAt": "2026-10-31T09:16:00Z",
+      "status": "SYNCED",
+      "device": "iPhone 17 Pro Max"
+    },
+    {
+      "id": "sms-3",
+      "source": "Pix Bacen Push",
+      "rawText": "Pix enviado com sucesso! R$ 45,00 para DEMSUR MURIAE AGUA.",
+      "parsedAmount": 45,
+      "parsedMerchant": "DEMSUR Muriaé Água",
+      "detectedCard": "Pix Direto Conta",
+      "assignedCategory": "Contas de Consumo",
+      "capturedAt": "2026-10-24T08:46:00Z",
+      "status": "SYNCED",
+      "device": "iPhone 17 Pro Max"
     }
   ]
 }

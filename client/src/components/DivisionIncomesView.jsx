@@ -318,3 +318,4 @@ export function DivisionIncomesView({ wellhubData, incomesData, fixedExpensesDat
     </div>
   );
 }
+

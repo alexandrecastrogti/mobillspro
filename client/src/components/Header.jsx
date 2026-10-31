@@ -10,7 +10,10 @@ import {
   TrendingUp, 
   RefreshCw,
   SlidersHorizontal,
-  ShieldCheck
+  ShieldCheck,
+  Target,
+  Smartphone,
+  Layers
 } from 'lucide-react';
 import { formatBRL } from '../utils/formatters';
 
@@ -25,12 +28,15 @@ export function Header({
 }) {
   const navTabs = [
     { id: 'dashboard', label: 'Balanço Geral', icon: Sparkles },
-    { id: 'incomes', label: 'Divisão 50/50 & Receitas', icon: ArrowLeftRight },
+    { id: 'budgets', label: 'Metas & Orçamento', icon: Target },
+    { id: 'cards-advanced', label: 'Faturas & Cartões', icon: CreditCard },
+    { id: 'incomes', label: 'Divisão 50/50', icon: ArrowLeftRight },
     { id: 'checklist', label: 'Checklist Fixas', icon: CheckSquare },
-    { id: 'cards', label: 'Auditoria Cartões', icon: CreditCard },
+    { id: 'cards', label: 'Auditoria 6 Meses', icon: Layers },
     { id: 'pix', label: 'Detector Pix', icon: Wallet },
     { id: 'housing', label: 'Transição Centro (Caixa)', icon: Building2 },
     { id: 'investments', label: 'Investimentos & Ativos', icon: TrendingUp },
+    { id: 'iphone', label: 'Captura iPhone Push', icon: Smartphone },
   ];
 
   const months = [
@@ -60,7 +66,7 @@ export function Header({
                 Mobills<span className="text-emerald-400">Pro</span>
               </h1>
               <span className="text-[10px] uppercase tracking-wider font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                Produção PWA
+                Web Elite PWA
               </span>
             </div>
             <p className="text-xs text-gray-400 flex items-center gap-1">
@@ -133,13 +139,13 @@ export function Header({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-150 ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-150 ${
                   isActive
                     ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/25 border border-emerald-400/40'
                     : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/60 border border-transparent'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-400'}`} />
+                <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isActive ? 'text-white' : 'text-gray-400'}`} />
                 <span>{tab.label}</span>
               </button>
             );

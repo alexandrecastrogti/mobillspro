@@ -10,7 +10,8 @@ export const initialData = {
     fellowshipAlexandre: 1100.00,
     totalIncomeAlexandre: 11096.21,
     wellhubReimbursementTotal: 549.90,
-    currentMonth: "2026-10"
+    currentMonth: "2026-10",
+    device: "iPhone 17 Pro Max (iOS 20)"
   },
 
   incomes: [
@@ -204,7 +205,7 @@ export const initialData = {
     {
       id: "fix-9",
       title: "Academia Alexandre (Exclusivo)",
-      category: "Saúde & Fitness",
+      category: "Saúde & Fitness (Alexandre)",
       totalAmount: 140.00,
       alexandreShare: 140.00,
       amandaShare: 0.00,
@@ -220,37 +221,196 @@ export const initialData = {
     }
   ],
 
+  // Cartões de Crédito Avançados com Ciclo de Faturas & Linha do Tempo
   creditCards: [
     {
       id: "card-nubank",
-      cardName: "Nubank",
+      cardName: "Nubank Ultravioleta",
+      brand: "Mastercard Black",
       color: "purple",
       closingDay: 24,
       dueDay: 1,
+      bestBuyDay: 25,
       creditLimit: 14000.00,
-      themeClass: "from-purple-900 to-indigo-950 border-purple-500/40"
+      usedLimit: 2240.40, // 1820.40 fatura atual + 420.00 lançamentos futuros
+      availableLimit: 11759.60,
+      currentInvoice: 1820.40,
+      invoiceStatus: "FECHADA",
+      nextInvoiceEstimated: 420.00,
+      themeClass: "from-purple-950 via-indigo-950 to-gray-950 border-purple-500/40",
+      notes: "Melhor dia para compras: Dia 25. Vencimento no 1º dia do mês seguinte."
     },
     {
       id: "card-bradesco",
-      cardName: "Bradesco",
+      cardName: "Bradesco Visa Platinum",
+      brand: "Visa Platinum",
       color: "red",
       closingDay: 18,
       dueDay: 25,
+      bestBuyDay: 19,
       creditLimit: 18500.00,
-      themeClass: "from-red-950 to-rose-950 border-red-500/40"
+      usedLimit: 1780.00,
+      availableLimit: 16720.00,
+      currentInvoice: 1780.00,
+      invoiceStatus: "ABERTA",
+      nextInvoiceEstimated: 0.00, // Parcela 10/10 encerrou!
+      themeClass: "from-red-950 via-rose-950 to-gray-950 border-red-500/40",
+      notes: "Última parcela 10/10 encerrada em Outubro. Sem parcelamentos a partir de Novembro!"
     },
     {
       id: "card-mercadopago",
-      cardName: "Mercado Pago",
+      cardName: "Mercado Pago Visa",
+      brand: "Visa",
       color: "sky",
       closingDay: 10,
       dueDay: 17,
+      bestBuyDay: 11,
       creditLimit: 8500.00,
-      themeClass: "from-sky-950 to-blue-950 border-sky-500/40"
+      usedLimit: 1520.00,
+      availableLimit: 6980.00,
+      currentInvoice: 1520.00,
+      invoiceStatus: "FECHADA",
+      nextInvoiceEstimated: 250.00,
+      themeClass: "from-sky-950 via-blue-950 to-gray-950 border-sky-500/40",
+      notes: "Contém a despesa atípica de funilaria (R$ 1.000,00) que já foi quitada."
     }
   ],
 
-  // Auditoria histórica de 6 meses (Maio a Outubro de 2026)
+  // Orçamento por Centro de Custo / Metas (Padrão Mobills)
+  budgets: [
+    {
+      id: "bg-1",
+      category: "Supermercados Muriaé",
+      description: "Supermercados BH + Bahamas Mix + Top Frut Gourmet",
+      targetAmount: 1550.00,
+      spentAmount: 2600.10,
+      percentage: 167.7,
+      status: "ALERT",
+      alertNote: "Estourou a meta em R$ 1.050,10 devido a compras volumosas de despensa em Outubro.",
+      shared5050: true
+    },
+    {
+      id: "bg-2",
+      category: "Moradia & Habitação",
+      description: "Aluguel Atual + Taxa de Condomínio",
+      targetAmount: 880.50,
+      spentAmount: 880.50,
+      percentage: 100.0,
+      status: "WARN",
+      alertNote: "No limite programado. Será substituído na transição para o Centro.",
+      shared5050: true
+    },
+    {
+      id: "bg-3",
+      category: "Prestação do Terreno",
+      description: "Loteamento Residencial Muriaé",
+      targetAmount: 1343.26,
+      spentAmount: 1343.26,
+      percentage: 100.0,
+      status: "WARN",
+      alertNote: "Parcela fixa patrimonial em dia.",
+      shared5050: true
+    },
+    {
+      id: "bg-4",
+      category: "Combustível & Transporte",
+      description: "Posto Faisão Muriaé + Posto DM",
+      targetAmount: 480.00,
+      spentAmount: 480.00,
+      percentage: 100.0,
+      status: "WARN",
+      alertNote: "Cai para R$ 120,00/mês com a mudança para o Centro de Muriaé (-R$ 360 de economia).",
+      shared5050: true
+    },
+    {
+      id: "bg-5",
+      category: "Saúde Individual (Alexandre)",
+      description: "Unimed Plano Individual Completo",
+      targetAmount: 500.00,
+      spentAmount: 485.00,
+      percentage: 97.0,
+      status: "WARN",
+      alertNote: "Despesa 100% individual de Alexandre (não entra no 50/50).",
+      shared5050: false
+    },
+    {
+      id: "bg-6",
+      category: "Serviços Domésticos",
+      description: "Faxina quinzenal residência Muriaé",
+      targetAmount: 200.00,
+      spentAmount: 180.00,
+      percentage: 90.0,
+      status: "WARN",
+      alertNote: "Metade Alexandre (total R$ 360,00).",
+      shared5050: true
+    },
+    {
+      id: "bg-7",
+      category: "Contas de Consumo",
+      description: "Energisa Muriaé + Fibra Óptica + DEMSUR Água",
+      targetAmount: 350.00,
+      spentAmount: 300.00,
+      percentage: 85.7,
+      status: "WARN",
+      alertNote: "Consumo moderado de energia e água no mês.",
+      shared5050: true
+    },
+    {
+      id: "bg-8",
+      category: "Alimentação Fora & Restaurantes",
+      description: "Churrascaria, Pizzaria e Padaria Muriaé",
+      targetAmount: 400.00,
+      spentAmount: 320.00,
+      percentage: 80.0,
+      status: "WARN",
+      alertNote: "Dentro do limite planejado para o lazer do casal.",
+      shared5050: true
+    },
+    {
+      id: "bg-9",
+      category: "Saúde & Fitness (Alexandre)",
+      description: "Academia Performance Muriaé",
+      targetAmount: 150.00,
+      spentAmount: 140.00,
+      percentage: 93.3,
+      status: "WARN",
+      alertNote: "Mensalidade individual Alexandre.",
+      shared5050: false
+    },
+    {
+      id: "bg-10",
+      category: "Farmácia & Medicamentos",
+      description: "Farmácia Indiana Muriaé",
+      targetAmount: 200.00,
+      spentAmount: 110.90,
+      percentage: 55.5,
+      status: "OK",
+      alertNote: "Meta bem controlada com economia de R$ 89,10.",
+      shared5050: true
+    }
+  ],
+
+  // Fluxo de Caixa Mensal Histórico (Entradas vs Saídas)
+  cashFlowHistory: [
+    { month: "2026-05", label: "Maio", inflow: 11646.11, outflow: 5794.56, balance: 5851.55 },
+    { month: "2026-06", label: "Junho", inflow: 11646.11, outflow: 5744.26, balance: 5901.85 },
+    { month: "2026-07", label: "Julho", inflow: 11646.11, outflow: 5864.76, balance: 5781.35 },
+    { month: "2026-08", label: "Agosto", inflow: 11646.11, outflow: 5853.76, balance: 5792.35 },
+    { month: "2026-09", label: "Setembro", inflow: 11646.11, outflow: 5794.06, balance: 5852.05 },
+    { month: "2026-10", label: "Outubro", inflow: 11646.11, outflow: 5334.26, balance: 6311.85 }
+  ],
+
+  // Evolução Histórica do Patrimônio Líquido Familiar (R$)
+  netWorthHistory: [
+    { month: "2026-05", label: "Maio", totalBRL: 98400.00, nomadUSD: 3100.00 },
+    { month: "2026-06", label: "Junho", totalBRL: 104200.00, nomadUSD: 3350.00 },
+    { month: "2026-07", label: "Julho", totalBRL: 109800.00, nomadUSD: 3600.00 },
+    { month: "2026-08", label: "Agosto", totalBRL: 115400.00, nomadUSD: 3850.00 },
+    { month: "2026-09", label: "Setembro", totalBRL: 120900.00, nomadUSD: 4050.00 },
+    { month: "2026-10", label: "Outubro", totalBRL: 126387.50, nomadUSD: 4250.00 }
+  ],
+
+  // Auditoria histórica de 6 meses de faturas
   monthlyAuditSummary: [
     {
       month: "2026-05",
@@ -315,13 +475,13 @@ export const initialData = {
     {
       month: "2026-10",
       label: "Outubro 2026",
-      supermarketTotal: 2600.10, // Pico atípico!
+      supermarketTotal: 2600.10,
       supermarketBreakdown: { bh: 1250.50, bahamas: 890.60, topfrut: 459.00 },
       nubankTotal: 1820.40,
-      bradescoTotal: 1780.00, // Encerrou parcela 10/10 de R$ 480
-      mercadoPagoTotal: 1520.00, // Contém Funilaria R$ 1.000
+      bradescoTotal: 1780.00,
+      mercadoPagoTotal: 1520.00,
       totalCards: 5120.40,
-      atypicalAmount: 1480.00, // Funilaria R$ 1.000 + Parcela encerrada Bradesco R$ 480
+      atypicalAmount: 1480.00,
       notes: "PICO ATÍPICO DE OUTUBRO: Mercado R$ 2.600,10 + Funilaria R$ 1.000 + Fim de parcelamento Bradesco"
     }
   ],
@@ -332,7 +492,7 @@ export const initialData = {
     octoberPeak: 2600.10,
     octoberExcess: 1066.82,
     atypicalTotalOctober: 1480.00,
-    cleanOctoberCardsTotal: 3640.40 // 5120.40 - 1480.00
+    cleanOctoberCardsTotal: 3640.40
   },
 
   // Transações de cartão detalhadas
@@ -370,7 +530,7 @@ export const initialData = {
       cardId: "card-nubank",
       cardName: "Nubank",
       establishment: "Supermercados BH Muriaé - Centro",
-      category: "Supermercado",
+      category: "Supermercados Muriaé",
       amount: 680.50,
       transactionDate: "2026-10-06",
       installmentInfo: "À vista",
@@ -384,7 +544,7 @@ export const initialData = {
       cardId: "card-nubank",
       cardName: "Nubank",
       establishment: "Supermercados BH Muriaé - Barra",
-      category: "Supermercado",
+      category: "Supermercados Muriaé",
       amount: 570.00,
       transactionDate: "2026-10-21",
       installmentInfo: "À vista",
@@ -398,7 +558,7 @@ export const initialData = {
       cardId: "card-bradesco",
       cardName: "Bradesco",
       establishment: "Bahamas Mix Muriaé",
-      category: "Supermercado",
+      category: "Supermercados Muriaé",
       amount: 890.60,
       transactionDate: "2026-10-14",
       installmentInfo: "À vista",
@@ -412,7 +572,7 @@ export const initialData = {
       cardId: "card-nubank",
       cardName: "Nubank",
       establishment: "Top Frut Gourmet Muriaé",
-      category: "Hortifruti & Carnes",
+      category: "Supermercados Muriaé",
       amount: 459.00,
       transactionDate: "2026-10-18",
       installmentInfo: "À vista",
@@ -426,7 +586,7 @@ export const initialData = {
       cardId: "card-nubank",
       cardName: "Nubank",
       establishment: "Farmácia Indiana Muriaé",
-      category: "Farmácia",
+      category: "Farmácia & Medicamentos",
       amount: 110.90,
       transactionDate: "2026-10-09",
       installmentInfo: "À vista",
@@ -440,7 +600,7 @@ export const initialData = {
       cardId: "card-bradesco",
       cardName: "Bradesco",
       establishment: "Posto Faisão Muriaé",
-      category: "Combustível",
+      category: "Combustível & Transporte",
       amount: 240.00,
       transactionDate: "2026-10-11",
       installmentInfo: "À vista",
@@ -454,7 +614,7 @@ export const initialData = {
       cardId: "card-bradesco",
       cardName: "Bradesco",
       establishment: "Posto DM Combustíveis",
-      category: "Combustível",
+      category: "Combustível & Transporte",
       amount: 240.00,
       transactionDate: "2026-10-25",
       installmentInfo: "À vista",
@@ -468,7 +628,7 @@ export const initialData = {
       cardId: "card-mercadopago",
       cardName: "Mercado Pago",
       establishment: "Restaurante e Churrascaria Muriaé",
-      category: "Alimentação Fora",
+      category: "Alimentação Fora & Restaurantes",
       amount: 180.00,
       transactionDate: "2026-10-19",
       installmentInfo: "À vista",
@@ -482,7 +642,7 @@ export const initialData = {
       cardId: "card-mercadopago",
       cardName: "Mercado Pago",
       establishment: "Padaria Central Muriaé",
-      category: "Padaria / Lanches",
+      category: "Alimentação Fora & Restaurantes",
       amount: 140.00,
       transactionDate: "2026-10-22",
       installmentInfo: "À vista",
@@ -578,7 +738,7 @@ export const initialData = {
       direction: "SAIDA",
       amount: 140.00,
       partyName: "Academia Performance Muriaé",
-      category: "Saúde & Fitness",
+      category: "Saúde & Fitness (Alexandre)",
       description: "Mensalidade Academia Alexandre Outubro",
       transactionDate: "2026-10-05T09:00:00Z",
       e2eId: "E00000000202610050900g7714",
@@ -601,7 +761,47 @@ export const initialData = {
     }
   ],
 
-  // Parâmetros do Simulador de Transição de Moradia (Centro - Caixa SBPE)
+  // Motor de Captura Automática por SMS e Notificações Push (iPhone 17 Pro Max)
+  smsPushCaptures: [
+    {
+      id: "sms-1",
+      source: "Nubank Push",
+      rawText: "Compra de R$ 68,90 aprovada no Nubank em TOP FRUT GOURMET MURIAE",
+      parsedAmount: 68.90,
+      parsedMerchant: "Top Frut Gourmet Muriaé",
+      detectedCard: "Nubank Ultravioleta",
+      assignedCategory: "Supermercados Muriaé",
+      capturedAt: "2026-10-31T11:42:00Z",
+      status: "SYNCED",
+      device: "iPhone 17 Pro Max"
+    },
+    {
+      id: "sms-2",
+      source: "Bradesco SMS",
+      rawText: "Bradesco Cartoes: Compra aprovada de R$ 120,00 no POSTO FAISAO MURIAE em 31/10 as 09:15.",
+      parsedAmount: 120.00,
+      parsedMerchant: "Posto Faisão Muriaé",
+      detectedCard: "Bradesco Visa Platinum",
+      assignedCategory: "Combustível & Transporte",
+      capturedAt: "2026-10-31T09:16:00Z",
+      status: "SYNCED",
+      device: "iPhone 17 Pro Max"
+    },
+    {
+      id: "sms-3",
+      source: "Pix Bacen Push",
+      rawText: "Pix enviado com sucesso! R$ 45,00 para DEMSUR MURIAE AGUA.",
+      parsedAmount: 45.00,
+      parsedMerchant: "DEMSUR Muriaé Água",
+      detectedCard: "Pix Direto Conta",
+      assignedCategory: "Contas de Consumo",
+      capturedAt: "2026-10-24T08:46:00Z",
+      status: "SYNCED",
+      device: "iPhone 17 Pro Max"
+    }
+  ],
+
+  // Parâmetros do Simulador de Transição de Moradia (Centro - Caixa SBPE SAC 10,65% a.a.)
   housingSimulation: {
     current: {
       title: "Moradia Atual (Bairro)",
@@ -614,7 +814,8 @@ export const initialData = {
       logisticsNote: "Necessidade contínua de deslocamento de carro/moto para o Centro de Muriaé, trabalho e comércio."
     },
     newCenterApartment: {
-      title: "Apartamento Novo no Centro (CAIXA SBPE)",
+      title: "Apartamento Novo no Centro (CAIXA SBPE SAC)",
+      caixaRate: "10.65% a.a. + TR (Taxa SBPE Caixa)",
       caixaSacFirstInstallment: 3231.32,
       caixaSacAmortizationPerMonth: 9.85, // SAC decrescente
       condoShare: 250.00,

@@ -111,3 +111,4 @@ CREATE TABLE IF NOT EXISTS investments (
     monthly_yield_est NUMERIC(12, 2),
     last_updated DATE NOT NULL
 );
+
