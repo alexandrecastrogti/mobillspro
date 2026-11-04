@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Header } from './components/Header';
 import { DashboardView } from './components/DashboardView';
 import { DivisionIncomesView } from './components/DivisionIncomesView';
@@ -8,8 +8,12 @@ import { PixDetectorView } from './components/PixDetectorView';
 import { HousingTransitionView } from './components/HousingTransitionView';
 import { InvestmentsView } from './components/InvestmentsView';
 import { BudgetsMetasView } from './components/BudgetsMetasView';
+import { Budget503020View } from './components/Budget503020View';
 import { CreditCardsAdvancedView } from './components/CreditCardsAdvancedView';
 import { IPhoneCaptureEngineView } from './components/IPhoneCaptureEngineView';
+import { NewTransactionModal } from './components/NewTransactionModal';
+import { SidebarRail } from './components/SidebarRail';
+import { useFinanceManager } from './hooks/useFinanceManager';
 import { 
   Sparkles, 
   ArrowLeftRight, 
@@ -20,10 +24,9 @@ import {
   TrendingUp,
   RotateCcw,
   Target,
-  Smartphone
+  Smartphone,
+  Plus
 } from 'lucide-react';
-
-const API_BASE = '/api';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -31,206 +34,114 @@ export default function App() {
   const [period, setPeriod] = useState('CURRENT_MONTH');
   const [excludeAtypical, setExcludeAtypical] = useState(true);
   const [useNewApartment, setUseNewApartment] = useState(false);
+  const [isNewModalOpen, setIsNewModalOpen] = useState(false);
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Core Data States
-  const [summaryData, setSummaryData] = useState(null);
-  const [fixedExpensesData, setFixedExpensesData] = useState([]);
-  const [cardsAuditData, setCardsAuditData] = useState(null);
-  const [detailedCardsData, setDetailedCardsData] = useState([]);
-  const [budgetsData, setBudgetsData] = useState([]);
-  const [pixData, setPixData] = useState(null);
-  const [housingData, setHousingData] = useState(null);
-  const [investmentsData, setInvestmentsData] = useState(null);
-  const [wellhubData, setWellhubData] = useState(null);
-  const [incomesData, setIncomesData] = useState([]);
-  const [smsHistoryData, setSmsHistoryData] = useState([]);
-
-  // Fetch all data
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Fetch summary with query params
-      const summaryRes = await fetch(
-        `${API_BASE}/dashboard/summary?month=${selectedMonth}&period=${period}&excludeAtypical=${excludeAtypical}&useNewApartment=${useNewApartment}`
-      );
-      const summaryJson = await summaryRes.json();
-      setSummaryData(summaryJson);
-
-      // Parallel fetch for specific modules
-      const [
-        fixedRes,
-        cardsAuditRes,
-        cardsDetailedRes,
-        budgetsRes,
-        pixRes,
-        housingRes,
-        investRes,
-        wellhubRes,
-        incomesRes,
-        smsHistoryRes
-      ] = await Promise.all([
-        fetch(`${API_BASE}/fixed-expenses?month=${selectedMonth}`),
-        fetch(`${API_BASE}/cards/audit`),
-        fetch(`${API_BASE}/cards/detailed`),
-        fetch(`${API_BASE}/budgets`),
-        fetch(`${API_BASE}/pix?month=${selectedMonth}`),
-        fetch(`${API_BASE}/housing/simulation`),
-        fetch(`${API_BASE}/investments`),
-        fetch(`${API_BASE}/wellhub?month=${selectedMonth}`),
-        fetch(`${API_BASE}/incomes?month=${selectedMonth}`),
-        fetch(`${API_BASE}/sms/history`)
-      ]);
-
-      const [
-        fixedJson,
-        cardsAuditJson,
-        cardsDetailedJson,
-        budgetsJson,
-        pixJson,
-        housingJson,
-        investJson,
-        wellhubJson,
-        incomesJson,
-        smsHistoryJson
-      ] = await Promise.all([
-        fixedRes.json(),
-        cardsAuditRes.json(),
-        cardsDetailedRes.json(),
-        budgetsRes.json(),
-        pixRes.json(),
-        housingRes.json(),
-        investRes.json(),
-        wellhubRes.json(),
-        incomesRes.json(),
-        smsHistoryRes.json()
-      ]);
-
-      setFixedExpensesData(fixedJson.expenses || []);
-      setCardsAuditData(cardsAuditJson);
-      setDetailedCardsData(cardsDetailedJson || []);
-      setBudgetsData(budgetsJson || []);
-      setPixData(pixJson);
-      setHousingData(housingJson);
-      setInvestmentsData(investJson);
-      setWellhubData(wellhubJson);
-      setIncomesData(incomesJson);
-      setSmsHistoryData(smsHistoryJson || []);
-    } catch (err) {
-      console.error('Erro ao carregar dados do MobillsPro:', err);
-      setError('Não foi possível conectar ao servidor. Verifique se o backend está em execução.');
-    } finally {
-      setLoading(false);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return document.documentElement.classList.contains('dark');
     }
-  }, [selectedMonth, period, excludeAtypical, useNewApartment]);
+    return false;
+  });
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  // Toggle Fixed Expense Status (Pago / Pendente)
-  const handleToggleFixedExpense = async (id) => {
-    try {
-      const res = await fetch(`${API_BASE}/fixed-expenses/${id}/toggle`, {
-        method: 'PATCH'
-      });
-      if (res.ok) {
-        fetchData();
-      }
-    } catch (err) {
-      console.error('Erro ao alternar status da despesa:', err);
+  const toggleTheme = () => {
+    const nextDark = !isDark;
+    setIsDark(nextDark);
+    if (nextDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('mobillspro_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('mobillspro_theme', 'light');
     }
   };
 
-  // Toggle Atypical Card Transaction
-  const handleToggleAtypicalTransaction = async (id) => {
-    try {
-      const res = await fetch(`${API_BASE}/cards/transactions/${id}/toggle-atypical`, {
-        method: 'PATCH'
-      });
-      if (res.ok) {
-        fetchData();
-      }
-    } catch (err) {
-      console.error('Erro ao alternar atípico:', err);
-    }
-  };
-
-  // Update Budget (Meta)
-  const handleUpdateBudget = async (id, payload) => {
-    try {
-      const res = await fetch(`${API_BASE}/budgets/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (res.ok) {
-        fetchData();
-      }
-    } catch (err) {
-      console.error('Erro ao atualizar meta orçamentária:', err);
-    }
-  };
-
-  // Update Investment
-  const handleUpdateInvestment = async (id, payload) => {
-    try {
-      const res = await fetch(`${API_BASE}/investments/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (res.ok) {
-        fetchData();
-      }
-    } catch (err) {
-      console.error('Erro ao atualizar investimento:', err);
-    }
-  };
-
-  // Reset to initial seed
-  const handleResetSystem = async () => {
-    if (window.confirm('Deseja recarregar a base de dados padrão pré-carregada do MobillsPro?')) {
-      try {
-        await fetch(`${API_BASE}/system/reset`, { method: 'POST' });
-        fetchData();
-      } catch (err) {
-        console.error('Erro no reset:', err);
-      }
-    }
-  };
+  // Clean Architecture: Delegate state & persistence to Custom Hook
+  const {
+    loading,
+    error,
+    refreshData,
+    summaryData,
+    fixedExpensesData,
+    cardsAuditData,
+    detailedCardsData,
+    budgetsData,
+    pixData,
+    housingData,
+    investmentsData,
+    wellhubData,
+    incomesData,
+    smsHistoryData,
+    // CRUD Actions
+    toggleFixedExpense,
+    deleteFixedExpense,
+    toggleAtypicalTransaction,
+    deleteCardTransaction,
+    updateCreditCard,
+    deletePixTransaction,
+    updateBudget,
+    deleteBudget,
+    deleteIncome,
+    resetSystem
+  } = useFinanceManager(selectedMonth, period, excludeAtypical, useNewApartment);
 
   const magicNumber = summaryData?.balance?.magicNumber;
 
+  // UI Matrix: Atalhos de Teclado Globais para Digitação Acelerada (Heads-Down UX)
+  React.useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      const isInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target?.tagName);
+      if (!isInput) {
+        if (e.key.toLowerCase() === 'n' && !e.metaKey && !e.ctrlKey) {
+          e.preventDefault();
+          setIsNewModalOpen(true);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-gray-100 flex flex-col font-sans pb-16 md:pb-0">
+    <div className="min-h-screen bg-[#F0F4F8] dark:bg-[#0D0F14] text-slate-900 dark:text-zinc-100 flex font-sans pb-20 md:pb-0 relative selection:bg-purple-500/20 selection:text-purple-700 dark:selection:text-purple-300 transition-colors duration-150">
       
-      {/* Top Header */}
-      <Header
+      {/* Desktop Mobills Left Sidebar Rail */}
+      <SidebarRail
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        selectedMonth={selectedMonth}
-        setSelectedMonth={setSelectedMonth}
-        magicNumber={magicNumber}
-        onRefresh={fetchData}
-        loading={loading}
+        onOpenNewModal={() => setIsNewModalOpen(true)}
+        onResetSystem={resetSystem}
+        isDark={isDark}
+        toggleTheme={toggleTheme}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Main Viewport Column (Offset by Sidebar on Desktop) */}
+      <div className="flex-1 flex flex-col md:pl-16 sm:md:pl-18 min-w-0">
+        
+        {/* Top Header */}
+        <Header
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          selectedMonth={selectedMonth}
+          setSelectedMonth={setSelectedMonth}
+          magicNumber={magicNumber}
+          onRefresh={refreshData}
+          loading={loading}
+          onOpenNewModal={() => setIsNewModalOpen(true)}
+          isDark={isDark}
+          toggleTheme={toggleTheme}
+        />
+
+        {/* Main Content Area */}
+        <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
         
         {error && (
-          <div className="mb-6 p-4 rounded-2xl bg-rose-950/40 border border-rose-500/50 text-rose-300 text-sm flex items-center justify-between">
+          <div className="mb-6 p-4 rounded-xl bg-amber-950/40 border border-amber-600/40 text-amber-200 text-xs flex items-center justify-between font-mono">
             <span>{error}</span>
             <button
-              onClick={fetchData}
-              className="px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg text-xs"
+              onClick={refreshData}
+              className="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-black font-semibold rounded text-xs transition"
             >
-              Tentar Novamente
+              Reconectar
             </button>
           </div>
         )}
@@ -244,19 +155,31 @@ export default function App() {
             useNewApartment={useNewApartment}
             setUseNewApartment={setUseNewApartment}
             setActiveTab={setActiveTab}
-            onToggleFixedExpense={handleToggleFixedExpense}
+            onToggleFixedExpense={toggleFixedExpense}
             period={period}
             setPeriod={setPeriod}
             fixedExpenses={fixedExpensesData}
             cardTransactions={cardsAuditData?.transactions}
+            onOpenNewModal={() => setIsNewModalOpen(true)}
+            onResetSystem={resetSystem}
           />
         )}
 
-        {/* Tab 2: Metas & Orçamento por Centro de Custo (Padrão Mobills) */}
+        {/* Tab: Método 50/30/20 (Inspirado na Planilha Mensal do Alexandre) */}
+        {activeTab === 'budget503020' && (
+          <Budget503020View
+            summaryData={summaryData}
+            onNavigateTab={setActiveTab}
+          />
+        )}
+
+        {/* Tab 2: Metas & Orçamento por Centro de Custo */}
         {activeTab === 'budgets' && (
           <BudgetsMetasView
             budgetsData={budgetsData}
-            onUpdateBudget={handleUpdateBudget}
+            onUpdateBudget={updateBudget}
+            onDeleteBudget={deleteBudget}
+            onOpenNewModal={() => setIsNewModalOpen(true)}
           />
         )}
 
@@ -264,6 +187,7 @@ export default function App() {
         {activeTab === 'cards-advanced' && (
           <CreditCardsAdvancedView
             cardsData={detailedCardsData}
+            onUpdateCard={updateCreditCard}
           />
         )}
 
@@ -273,6 +197,8 @@ export default function App() {
             wellhubData={wellhubData}
             incomesData={incomesData}
             fixedExpensesData={fixedExpensesData}
+            onDeleteIncome={deleteIncome}
+            onOpenNewModal={() => setIsNewModalOpen(true)}
           />
         )}
 
@@ -280,7 +206,9 @@ export default function App() {
         {activeTab === 'checklist' && (
           <FixedExpensesChecklist
             expenses={fixedExpensesData}
-            onToggleStatus={handleToggleFixedExpense}
+            onToggleStatus={toggleFixedExpense}
+            onDeleteExpense={deleteFixedExpense}
+            onOpenNewModal={() => setIsNewModalOpen(true)}
             selectedMonth={selectedMonth}
           />
         )}
@@ -291,7 +219,10 @@ export default function App() {
             auditData={cardsAuditData}
             excludeAtypical={excludeAtypical}
             setExcludeAtypical={setExcludeAtypical}
-            onToggleAtypicalTransaction={handleToggleAtypicalTransaction}
+            onToggleAtypicalTransaction={toggleAtypicalTransaction}
+            onDeleteTransaction={deleteCardTransaction}
+            onOpenNewModal={() => setIsNewModalOpen(true)}
+            onRefresh={refreshData}
           />
         )}
 
@@ -299,6 +230,8 @@ export default function App() {
         {activeTab === 'pix' && (
           <PixDetectorView
             pixData={pixData}
+            onDeletePix={deletePixTransaction}
+            onOpenNewModal={() => setIsNewModalOpen(true)}
           />
         )}
 
@@ -315,7 +248,14 @@ export default function App() {
         {activeTab === 'investments' && (
           <InvestmentsView
             investmentsData={investmentsData}
-            onUpdateInvestment={handleUpdateInvestment}
+            onUpdateInvestment={async (id, payload) => {
+              await fetch(`/api/investments/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              });
+              refreshData();
+            }}
           />
         )}
 
@@ -323,84 +263,126 @@ export default function App() {
         {activeTab === 'iphone' && (
           <IPhoneCaptureEngineView
             smsHistory={smsHistoryData}
-            onCaptureSms={fetchData}
+            onCaptureSms={refreshData}
           />
         )}
 
       </main>
 
-      {/* Footer / System Status */}
-      <footer className="mt-auto border-t border-gray-900 bg-[#070A11] py-4 px-4 sm:px-6 text-xs text-gray-500">
+      {/* GLOBAL FLOATING ACTION BUTTON (FAB) - NOVO LANÇAMENTO (SOLID WORKBENCH ACTION) */}
+      <button
+        onClick={() => setIsNewModalOpen(true)}
+        className="fixed bottom-20 md:bottom-8 right-6 z-40 px-4 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs tracking-wider uppercase shadow-xl shadow-black/60 flex items-center gap-2 transition active:scale-95 border border-emerald-400/80 cursor-pointer"
+        title="Novo Lançamento Rápido (Pressione 'N' no teclado)"
+      >
+        <Plus className="w-4 h-4 stroke-[2.5]" />
+        <span className="hidden sm:inline">Novo Lançamento</span>
+        <kbd className="hidden sm:inline-block px-1.5 py-0.2 rounded bg-black/20 text-black text-[10px] font-mono">
+          N
+        </kbd>
+      </button>
+
+      {/* GLOBAL TRANSACTION MODAL */}
+      <NewTransactionModal
+        isOpen={isNewModalOpen}
+        onClose={() => setIsNewModalOpen(false)}
+        onSuccess={refreshData}
+      />
+
+      {/* Footer / System Status Console */}
+      <footer className="mt-auto border-t border-slate-200 dark:border-[#1F232D] bg-white dark:bg-[#0E1015] py-3.5 px-4 sm:px-6 text-xs text-slate-500 dark:text-[#8B909A] font-mono transition-colors duration-150">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span>MobillsPro v2.0 Web Elite • Muriaé/MG</span>
-            <span>•</span>
-            <span className="text-gray-400">Alexandre & Amanda</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-slate-800 dark:text-zinc-300 font-bold">MOBILLSPRO</span>
+            <span className="text-slate-300 dark:text-zinc-600">|</span>
+            <span className="text-slate-600 dark:text-zinc-400">Muriaé/MG</span>
+            <span className="text-slate-300 dark:text-zinc-600">|</span>
+            <span className="text-slate-500 dark:text-zinc-500">Alexandre & Amanda</span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 text-[11px]">
             <button
-              onClick={handleResetSystem}
-              className="text-gray-500 hover:text-emerald-400 flex items-center gap-1 transition"
-              title="Recarrega a base original com as regras de negócio pré-carregadas"
+              onClick={resetSystem}
+              className="text-slate-600 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1.5 transition cursor-pointer"
+              title="Recarrega a base original oficial do MobillsPro"
             >
-              <RotateCcw className="w-3.5 h-3.5" /> Resetar Dados Padrão
+              <RotateCcw className="w-3.5 h-3.5" /> Resetar Dados
             </button>
-            <span>•</span>
-            <span className="text-emerald-400 font-mono">
-              iPhone 17 Pro Max Push Ready & PWA
+            <span className="text-slate-300 dark:text-zinc-600">|</span>
+            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+              Sistema Operacional
             </span>
           </div>
         </div>
       </footer>
 
-      {/* Mobile Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0B0F19]/95 backdrop-blur-lg border-t border-gray-800 px-2 py-1 flex justify-around">
+      </div>
+
+      {/* Mobile Bottom Navigation Bar (Solid Engineering Bar with >= 48px Touch Targets) */}
+      <nav 
+        aria-label="Navegação inferior mobile" 
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#0E1015]/95 backdrop-blur-sm border-t border-slate-200 dark:border-[#1F232D] px-1 pt-1 pb-[max(0.5rem,env(safe-area-inset-bottom,0.5rem))] grid grid-cols-6 transition-colors duration-150"
+      >
         <button
           onClick={() => setActiveTab('dashboard')}
-          className={`flex flex-col items-center py-1 px-1.5 text-[10px] font-semibold ${
-            activeTab === 'dashboard' ? 'text-emerald-400' : 'text-gray-400'
+          aria-current={activeTab === 'dashboard' ? 'page' : undefined}
+          className={`flex flex-col items-center justify-center py-1.5 px-1 min-h-[48px] text-[9px] font-mono font-medium rounded-lg transition active:scale-95 cursor-pointer ${
+            activeTab === 'dashboard' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-[#161A22]' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
           }`}
         >
           <Sparkles className="w-4 h-4 mb-0.5" />
-          Balanço
-        </button>
-        <button
-          onClick={() => setActiveTab('budgets')}
-          className={`flex flex-col items-center py-1 px-1.5 text-[10px] font-semibold ${
-            activeTab === 'budgets' ? 'text-emerald-400' : 'text-gray-400'
-          }`}
-        >
-          <Target className="w-4 h-4 mb-0.5" />
-          Metas
-        </button>
-        <button
-          onClick={() => setActiveTab('cards-advanced')}
-          className={`flex flex-col items-center py-1 px-1.5 text-[10px] font-semibold ${
-            activeTab === 'cards-advanced' ? 'text-emerald-400' : 'text-gray-400'
-          }`}
-        >
-          <CreditCard className="w-4 h-4 mb-0.5" />
-          Faturas
+          <span>Balanço</span>
         </button>
         <button
           onClick={() => setActiveTab('checklist')}
-          className={`flex flex-col items-center py-1 px-1.5 text-[10px] font-semibold ${
-            activeTab === 'checklist' ? 'text-emerald-400' : 'text-gray-400'
+          aria-current={activeTab === 'checklist' ? 'page' : undefined}
+          className={`flex flex-col items-center justify-center py-1.5 px-1 min-h-[48px] text-[9px] font-mono font-medium rounded-lg transition active:scale-95 cursor-pointer ${
+            activeTab === 'checklist' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-[#161A22]' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
           }`}
         >
           <CheckSquare className="w-4 h-4 mb-0.5" />
-          Fixas
+          <span>Fixas</span>
         </button>
         <button
-          onClick={() => setActiveTab('iphone')}
-          className={`flex flex-col items-center py-1 px-1.5 text-[10px] font-semibold ${
-            activeTab === 'iphone' ? 'text-sky-400' : 'text-gray-400'
+          onClick={() => setActiveTab('cards')}
+          aria-current={activeTab === 'cards' ? 'page' : undefined}
+          className={`flex flex-col items-center justify-center py-1.5 px-1 min-h-[48px] text-[9px] font-mono font-medium rounded-lg transition active:scale-95 cursor-pointer ${
+            activeTab === 'cards' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-[#161A22]' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
           }`}
         >
-          <Smartphone className="w-4 h-4 mb-0.5" />
-          iPhone
+          <CreditCard className="w-4 h-4 mb-0.5" />
+          <span>Cartões</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('pix')}
+          aria-current={activeTab === 'pix' ? 'page' : undefined}
+          className={`flex flex-col items-center justify-center py-1.5 px-1 min-h-[48px] text-[9px] font-mono font-medium rounded-lg transition active:scale-95 cursor-pointer ${
+            activeTab === 'pix' ? 'text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-[#161A22]' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
+          }`}
+        >
+          <ArrowLeftRight className="w-4 h-4 mb-0.5" />
+          <span>Pix</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('housing')}
+          aria-current={activeTab === 'housing' ? 'page' : undefined}
+          className={`flex flex-col items-center justify-center py-1.5 px-1 min-h-[48px] text-[9px] font-mono font-medium rounded-lg transition active:scale-95 cursor-pointer ${
+            activeTab === 'housing' ? 'text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-[#161A22]' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
+          }`}
+        >
+          <Building2 className="w-4 h-4 mb-0.5" />
+          <span>Moradia</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('investments')}
+          aria-current={activeTab === 'investments' ? 'page' : undefined}
+          className={`flex flex-col items-center justify-center py-1.5 px-1 min-h-[48px] text-[9px] font-mono font-medium rounded-lg transition active:scale-95 cursor-pointer ${
+            activeTab === 'investments' ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-[#161A22]' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
+          }`}
+        >
+          <TrendingUp className="w-4 h-4 mb-0.5" />
+          <span>Ativos</span>
         </button>
       </nav>
 

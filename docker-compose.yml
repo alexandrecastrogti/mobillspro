@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: mobillspro-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: mobills
+      POSTGRES_PASSWORD: mobillspassword2026
+      POSTGRES_DB: mobillspro
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mobills -d mobillspro"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mobillspro-app
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://mobills:mobillspassword2026@db:5432/mobillspro?schema=public
+      JWT_SECRET: mobillspro_production_jwt_secret_2026_muriae
+      JWT_REFRESH_SECRET: mobillspro_production_refresh_jwt_secret_2026_muriae
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: gemini-1.5-flash
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+

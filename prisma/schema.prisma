@@ -1,0 +1,158 @@
+// Prisma Schema para MobillsPro
+// Alexandre & Amanda - Muriaé/MG
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  owner
+  partner
+  viewer
+}
+
+enum PaymentStatus {
+  PAGO
+  PENDENTE
+}
+
+enum PixDirection {
+  IN
+  OUT
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         Role     @default(viewer)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Income {
+  id             String   @id @default(uuid())
+  userName       String   @default("Alexandre")
+  description    String
+  amount         Float
+  category       String
+  isRecurring    Boolean  @default(true)
+  referenceMonth String   @default("2026-10")
+  createdAt      DateTime @default(now())
+
+  @@map("incomes")
+}
+
+model Reimbursement {
+  id             String   @id @default(uuid())
+  beneficiary    String
+  planName       String   @default("Wellhub Silver")
+  amount         Float
+  status         String   @default("CREDITADO")
+  referenceMonth String   @default("2026-10")
+  createdAt      DateTime @default(now())
+
+  @@map("reimbursements")
+}
+
+model FixedExpense {
+  id             String        @id @default(uuid())
+  title          String
+  category       String
+  totalAmount    Float
+  alexandreShare Float
+  amandaShare    Float
+  isSplit5050    Boolean       @default(true)
+  beneficiary    String        @default("COMPARTILHADO")
+  dueDay         Int
+  referenceMonth String        @default("2026-10")
+  status         PaymentStatus @default(PENDENTE)
+  paidAt         DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  payments       Payment[]
+
+  @@map("fixed_expenses")
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  fixedExpenseId String
+  referenceMonth String
+  paidAmount     Float
+  status         PaymentStatus @default(PAGO)
+  paidAt         DateTime      @default(now())
+
+  fixedExpense   FixedExpense  @relation(fields: [fixedExpenseId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model CardTransaction {
+  id              String   @id @default(uuid())
+  cardName        String
+  month           String
+  merchant        String
+  category        String
+  amount          Float
+  isExcluded      Boolean  @default(false)
+  exclusionReason String?
+  isAtypical      Boolean  @default(false)
+  isShared        Boolean  @default(false)
+  referenceMonth  String   @default("2026-10")
+  createdAt       DateTime @default(now())
+
+  @@map("card_transactions")
+}
+
+model PixTransaction {
+  id             String       @id @default(uuid())
+  date           String
+  description    String
+  amount         Float
+  direction      PixDirection
+  category       String       @default("Outros")
+  referenceMonth String       @default("2026-10")
+  createdAt      DateTime     @default(now())
+
+  @@map("pix_transactions")
+}
+
+model HousingScenario {
+  id             String   @id @default(uuid())
+  name           String
+  rentShare      Float    @default(0)
+  landShare      Float    @default(0)
+  financingShare Float    @default(0)
+  condoShare     Float    @default(0)
+  fuelExpense    Float    @default(0)
+  isCurrent      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  @@map("housing_scenarios")
+}
+
+model Investment {
+  id              String   @id @default(uuid())
+  name            String
+  type            String
+  amount          Float
+  currency        String   @default("BRL")
+  exchangeRate    Float    @default(1.0)
+  selicAnnualRate Float    @default(13.75)
+  maturityMonths  Int      @default(12)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("investments")
+}
+

@@ -1,110 +1,157 @@
 import React, { useState } from 'react';
+import { StatementImportModal } from './StatementImportModal';
+import { downloadCSV } from '../utils/csvExporter';
 import { 
   CreditCard, 
   ShoppingCart, 
   Wrench, 
-  AlertTriangle, 
-  CheckCircle, 
-  Calendar, 
-  TrendingUp, 
-  Sparkles, 
-  Filter, 
-  Trash2, 
-  Layers, 
-  ShieldCheck,
-  Building,
   Store,
-  ChevronDown
+  Plus,
+  UploadCloud,
+  Download,
+  Trash2
 } from 'lucide-react';
-import { formatBRL, formatPercent } from '../utils/formatters';
+import { formatBRL } from '../utils/formatters';
 
 export function CardsAuditView({ 
   auditData, 
   excludeAtypical, 
   setExcludeAtypical,
-  onToggleAtypicalTransaction 
+  onToggleAtypicalTransaction,
+  onDeleteTransaction,
+  onOpenNewModal,
+  onRefresh
 }) {
   const [selectedCardFilter, setSelectedCardFilter] = useState('ALL');
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   if (!auditData) {
-    return <div className="p-8 text-center text-gray-400">Carregando auditoria dos cartões...</div>;
+    return <div className="p-8 text-center text-slate-500 dark:text-zinc-400 font-mono text-xs">Carregando auditoria dos cartões...</div>;
   }
 
   const { cards, history, supermarketBenchmark, transactions } = auditData;
 
-  // Filtered transactions
   const filteredTransactions = transactions.filter(t => {
     if (selectedCardFilter !== 'ALL' && t.cardId !== selectedCardFilter) return false;
     return true;
   });
 
+  const handleExportCSV = () => {
+    const rows = filteredTransactions.map(t => ({
+      Data: t.transactionDate,
+      Cartao: t.cardName,
+      Estabelecimento: t.establishment,
+      Categoria: t.category,
+      Valor_R$: t.amount,
+      Atipico: t.isAtypical ? 'SIM' : 'NAO',
+      Compartilhado_5050: t.isShared ? 'SIM' : 'NAO',
+      MesReferencia: t.referenceMonth || '2026-10'
+    }));
+    downloadCSV(`mobillspro_faturas_${selectedCardFilter.toLowerCase()}.csv`, rows);
+  };
+
+  const handleDelete = (id, establishment) => {
+    if (window.confirm(`Tem certeza que deseja excluir o lançamento de "${establishment}"?`)) {
+      if (onDeleteTransaction) onDeleteTransaction(id);
+    }
+  };
+
   return (
     <div className="space-y-6">
       
       {/* HEADER SECTION */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-emerald-500/20 shadow-2xl relative overflow-hidden">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div className="bg-white dark:bg-[#111318] border border-slate-200 dark:border-[#1F232D] rounded-xl p-5 shadow-sm">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1.5">
-                <CreditCard className="w-3.5 h-3.5" />
-                Auditoria Histórica de 6 Meses (Maio a Outubro/2026)
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800/50 flex items-center gap-1.5">
+                <CreditCard className="w-3 h-3" />
+                AUDITORIA 6 MESES • MAIO A OUTUBRO/2026
               </span>
-              <span className="text-xs text-gray-400">Nubank • Bradesco • Mercado Pago</span>
+              <span className="text-[11px] font-mono text-slate-500 dark:text-zinc-500">NUBANK • BRADESCO • MERCADO PAGO</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-zinc-100 tracking-tight">
               Controle de Faturas e Análise de Atípicos
             </h2>
-            <p className="text-xs sm:text-sm text-gray-300 max-w-2xl mt-1 leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-zinc-400 max-w-2xl mt-1 leading-relaxed">
               Consolidação analítica das faturas nos 3 cartões de crédito. Isolamento automático do pico extraordinário 
               de Supermercados e eliminação dos gastos que não se repetirão a partir de Novembro.
             </p>
           </div>
 
-          {/* Master Toggle: Eliminar Atípicos */}
-          <div className="bg-gray-900/90 border border-gray-800 rounded-2xl p-4 flex flex-col justify-between min-w-[280px]">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <span className="text-xs font-bold text-white block">
-                  Eliminar Gastos Atípicos
-                </span>
-                <span className="text-[11px] text-gray-400">
-                  Funilaria R$ 1.000 + Fim Bradesco R$ 480
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setExcludeAtypical(!excludeAtypical)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  excludeAtypical ? 'bg-emerald-500' : 'bg-gray-700'
-                }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                    excludeAtypical ? 'translate-x-5' : 'translate-x-0'
+          {/* Master Toggle: Eliminar Atípicos & Actions */}
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <div className="bg-slate-50 dark:bg-[#12151D] border border-slate-200 dark:border-[#222838] rounded-xl p-3 flex flex-col justify-between min-w-[270px]">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <span className="text-xs font-mono font-semibold text-slate-900 dark:text-zinc-200 block">
+                    Eliminar Gastos Atípicos
+                  </span>
+                  <span className="text-[10px] text-slate-500 dark:text-zinc-500 font-mono">
+                    Funilaria R$ 1.000 + Fim Bradesco R$ 389,90
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setExcludeAtypical(!excludeAtypical)}
+                  className={`relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out ${
+                    excludeAtypical ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-zinc-700'
                   }`}
-                />
-              </button>
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 ease-in-out ${
+                      excludeAtypical ? 'translate-x-5' : 'translate-x-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="mt-2 pt-1.5 border-t border-slate-200 dark:border-[#1F232D] text-[10px] text-emerald-700 dark:text-emerald-400 font-mono font-semibold">
+                {excludeAtypical ? '✓ Atípicos desconsiderados na projeção' : '• Total bruto mantido na fatura'}
+              </div>
             </div>
-            <div className="mt-2 pt-2 border-t border-gray-800 text-[11px] text-emerald-400 font-mono">
-              {excludeAtypical ? '✓ Atípicos desconsiderados no balanço' : '• Total bruto mantido na fatura'}
+
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
+              <button
+                onClick={handleExportCSV}
+                className="w-full sm:w-auto px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#141720] dark:hover:bg-[#1A1E29] text-slate-700 dark:text-zinc-300 border border-slate-300 dark:border-[#2B303E] text-xs font-mono flex items-center justify-center gap-1.5 transition cursor-pointer"
+                title="Exportar dados filtrados para CSV"
+              >
+                <Download className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />
+                <span>CSV</span>
+              </button>
+
+              <button
+                onClick={() => setIsImportModalOpen(true)}
+                className="w-full sm:w-auto px-3 py-2 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 dark:bg-[#161B26] dark:hover:bg-[#1E2535] dark:text-purple-300 dark:border-purple-800/40 text-xs font-mono font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer"
+                title="Importar fatura em formato OFX ou CSV"
+              >
+                <UploadCloud className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                <span>Importar</span>
+              </button>
+
+              <button
+                onClick={onOpenNewModal}
+                className="w-full sm:w-auto px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-semibold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5" /> Lançamento
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* BENCHMARK DE SUPERMERCADOS MURIAÉ (BH + BAHAMAS + TOP FRUT) */}
-      <div className="glass-panel rounded-2xl p-6 shadow-xl border border-amber-500/20">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gray-800">
+      {/* BENCHMARK DE SUPERMERCADOS MURIAÉ */}
+      <div className="bg-white dark:bg-[#111318] border border-slate-200 dark:border-[#1F232D] rounded-xl p-5 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-[#1F232D]">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400">
-              <ShoppingCart className="w-6 h-6" />
+            <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 dark:bg-amber-950/40 dark:border-amber-800/40 dark:text-amber-400">
+              <ShoppingCart className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-white">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-zinc-100 font-mono uppercase tracking-wide">
                 Média Histórica Real de Mercado vs Pico de Outubro
               </h3>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-slate-500 dark:text-zinc-400">
                 Consolidação: Supermercados BH (Centro e Barra) + Bahamas Mix Muriaé + Top Frut Gourmet
               </p>
             </div>
@@ -112,14 +159,14 @@ export function CardsAuditView({
 
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <span className="text-[10px] uppercase font-bold text-gray-400 block">Média Histórica</span>
-              <span className="text-lg font-black text-emerald-400 font-mono">
+              <span className="text-[10px] uppercase font-mono text-slate-500 dark:text-zinc-500 block">Média Histórica</span>
+              <span className="text-base font-bold text-emerald-700 dark:text-emerald-400 font-mono tabular-nums">
                 {formatBRL(supermarketBenchmark.historicalAverage)}
               </span>
             </div>
-            <div className="text-right pl-4 border-l border-gray-800">
-              <span className="text-[10px] uppercase font-bold text-amber-400 block">Pico de Outubro</span>
-              <span className="text-lg font-black text-amber-300 font-mono">
+            <div className="text-right pl-4 border-l border-slate-200 dark:border-[#1F232D]">
+              <span className="text-[10px] uppercase font-mono text-amber-700 dark:text-amber-400 block font-semibold">Pico de Outubro</span>
+              <span className="text-base font-bold text-amber-700 dark:text-amber-300 font-mono tabular-nums">
                 {formatBRL(supermarketBenchmark.octoberPeak)}
               </span>
             </div>
@@ -127,197 +174,43 @@ export function CardsAuditView({
         </div>
 
         {/* Visual comparison bar */}
-        <div className="mt-5 space-y-3">
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-300 font-medium">Média Real dos Meses Anteriores (Maio a Setembro):</span>
-              <span className="font-mono text-emerald-400 font-bold">{formatBRL(supermarketBenchmark.historicalAverage)}/mês</span>
+        <div className="mt-4 space-y-3">
+          <div className="space-y-1">
+            <div className="flex justify-between text-xs font-mono">
+              <span className="text-slate-600 dark:text-zinc-400">Média Real Anterior (Maio a Setembro):</span>
+              <span className="text-emerald-700 dark:text-emerald-400 font-semibold tabular-nums">{formatBRL(supermarketBenchmark.historicalAverage)}/mês</span>
             </div>
-            <div className="w-full bg-gray-800 h-3 rounded-full overflow-hidden">
-              <div className="bg-emerald-500 h-full rounded-full" style={{ width: '58%' }} />
+            <div className="w-full bg-slate-100 dark:bg-[#181C25] h-2.5 rounded-full overflow-hidden border border-slate-200 dark:border-transparent">
+              <div className="bg-emerald-600 h-full rounded-full" style={{ width: '58%' }} />
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs">
-              <span className="text-amber-300 font-medium">Pico de Outubro (Evento Atípico Extraordinário):</span>
-              <span className="font-mono text-amber-300 font-bold">{formatBRL(supermarketBenchmark.octoberPeak)} (+{formatBRL(supermarketBenchmark.octoberExcess)})</span>
+          <div className="space-y-1">
+            <div className="flex justify-between text-xs font-mono">
+              <span className="text-amber-800 dark:text-amber-300 font-medium">Pico de Outubro (Evento Atípico Extraordinário):</span>
+              <span className="text-amber-800 dark:text-amber-300 font-semibold tabular-nums">{formatBRL(supermarketBenchmark.octoberPeak)} (+{formatBRL(supermarketBenchmark.octoberExcess)})</span>
             </div>
-            <div className="w-full bg-gray-800 h-3 rounded-full overflow-hidden">
-              <div className="bg-gradient-to-r from-amber-500 to-rose-500 h-full rounded-full" style={{ width: '100%' }} />
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-4 p-3 rounded-xl bg-gray-900/80 border border-gray-800 text-xs text-gray-300 flex items-start gap-2.5">
-          <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-          <span>
-            <strong>Conclusão da Auditoria:</strong> O orçamento familiar deve calibrar a provisão de mercado em <strong>R$ 1.533,28</strong>. 
-            O estouro de Outubro (R$ 2.600,10) decorreu de compras acumuladas de despensa que não irão se manter como patamar regular.
-          </span>
-        </div>
-      </div>
-
-      {/* OS 3 CARTÕES: CARDS VISUAIS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        
-        {/* Cartão 1: Nubank */}
-        <div className="rounded-2xl p-5 bg-gradient-to-br from-[#1d0a33] to-[#0d0319] border border-purple-500/40 shadow-xl relative overflow-hidden">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <span className="text-[10px] uppercase font-bold text-purple-300 tracking-wider block">Cartão de Crédito</span>
-              <h3 className="text-xl font-black text-white">Nubank Roxo</h3>
-            </div>
-            <div className="w-7 h-7 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-300 font-bold text-xs border border-purple-500/30">
-              Nu
+            <div className="w-full bg-slate-100 dark:bg-[#181C25] h-2.5 rounded-full overflow-hidden border border-slate-200 dark:border-transparent">
+              <div className="bg-amber-500 h-full rounded-full" style={{ width: '100%' }} />
             </div>
           </div>
-          <div className="space-y-2 font-mono">
-            <div className="flex justify-between text-xs text-gray-300">
-              <span>Fatura Outubro:</span>
-              <span className="font-bold text-white">R$ 1.820,40</span>
-            </div>
-            <div className="flex justify-between text-xs text-gray-400">
-              <span>Fechamento:</span>
-              <span>Dia 24</span>
-            </div>
-            <div className="flex justify-between text-xs text-gray-400">
-              <span>Vencimento:</span>
-              <span className="text-purple-300 font-semibold">Dia 01</span>
-            </div>
-          </div>
-          <div className="mt-4 pt-3 border-t border-purple-900/40 text-[11px] text-purple-300">
-            Foco: Supermercados BH, Top Frut e Farmácia Indiana
-          </div>
-        </div>
-
-        {/* Cartão 2: Bradesco */}
-        <div className="rounded-2xl p-5 bg-gradient-to-br from-[#2b080c] to-[#120204] border border-red-500/40 shadow-xl relative overflow-hidden">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <span className="text-[10px] uppercase font-bold text-rose-300 tracking-wider block">Cartão de Crédito</span>
-              <h3 className="text-xl font-black text-white">Bradesco</h3>
-            </div>
-            <div className="w-7 h-7 rounded-full bg-red-500/20 flex items-center justify-center text-red-300 font-bold text-xs border border-red-500/30">
-              B
-            </div>
-          </div>
-          <div className="space-y-2 font-mono">
-            <div className="flex justify-between text-xs text-gray-300">
-              <span>Fatura Outubro:</span>
-              <span className="font-bold text-white">R$ 1.780,00</span>
-            </div>
-            <div className="flex justify-between text-xs text-gray-400">
-              <span>Fechamento:</span>
-              <span>Dia 18</span>
-            </div>
-            <div className="flex justify-between text-xs text-gray-400">
-              <span>Vencimento:</span>
-              <span className="text-rose-300 font-semibold">Dia 25</span>
-            </div>
-          </div>
-          <div className="mt-4 pt-3 border-t border-red-900/40 text-[11px] text-amber-300">
-            ✓ Parcela 10/10 encerrada (R$ 480 aliviado em Novembro)
-          </div>
-        </div>
-
-        {/* Cartão 3: Mercado Pago */}
-        <div className="rounded-2xl p-5 bg-gradient-to-br from-[#051c2e] to-[#010912] border border-sky-500/40 shadow-xl relative overflow-hidden">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <span className="text-[10px] uppercase font-bold text-sky-300 tracking-wider block">Cartão de Crédito</span>
-              <h3 className="text-xl font-black text-white">Mercado Pago</h3>
-            </div>
-            <div className="w-7 h-7 rounded-full bg-sky-500/20 flex items-center justify-center text-sky-300 font-bold text-xs border border-sky-500/30">
-              MP
-            </div>
-          </div>
-          <div className="space-y-2 font-mono">
-            <div className="flex justify-between text-xs text-gray-300">
-              <span>Fatura Outubro:</span>
-              <span className="font-bold text-white">R$ 1.520,00</span>
-            </div>
-            <div className="flex justify-between text-xs text-gray-400">
-              <span>Fechamento:</span>
-              <span>Dia 10</span>
-            </div>
-            <div className="flex justify-between text-xs text-gray-400">
-              <span>Vencimento:</span>
-              <span className="text-sky-300 font-semibold">Dia 17</span>
-            </div>
-          </div>
-          <div className="mt-4 pt-3 border-t border-sky-900/40 text-[11px] text-amber-300">
-            ⚠ Contém Funilaria R$ 1.000 (Atípico a isolar)
-          </div>
-        </div>
-      </div>
-
-      {/* HISTÓRICO DE 6 MESES CONSOLIDADO */}
-      <div className="glass-panel rounded-2xl p-6 shadow-xl">
-        <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-emerald-400" />
-          Histórico Comparativo de Faturas (Maio a Outubro de 2026)
-        </h3>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-gray-800 text-gray-400 uppercase text-[10px] tracking-wider">
-                <th className="pb-3 font-semibold">Mês</th>
-                <th className="pb-3 font-semibold">Supermercados</th>
-                <th className="pb-3 font-semibold">Nubank</th>
-                <th className="pb-3 font-semibold">Bradesco</th>
-                <th className="pb-3 font-semibold">Mercado Pago</th>
-                <th className="pb-3 font-semibold">Total Faturas</th>
-                <th className="pb-3 font-semibold text-right">Diagnóstico</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-800/60 font-mono">
-              {history.map((m) => {
-                const isOctober = m.month === '2026-10';
-                return (
-                  <tr key={m.month} className={`hover:bg-gray-800/30 transition ${isOctober ? 'bg-amber-500/5' : ''}`}>
-                    <td className="py-3 font-bold text-white font-sans">{m.label}</td>
-                    <td className={`py-3 ${isOctober ? 'text-amber-400 font-bold' : 'text-gray-300'}`}>
-                      {formatBRL(m.supermarketTotal)}
-                    </td>
-                    <td className="py-3 text-purple-300">{formatBRL(m.nubankTotal)}</td>
-                    <td className="py-3 text-rose-300">{formatBRL(m.bradescoTotal)}</td>
-                    <td className="py-3 text-sky-300">{formatBRL(m.mercadoPagoTotal)}</td>
-                    <td className="py-3 font-bold text-white">{formatBRL(m.totalCards)}</td>
-                    <td className="py-3 text-right font-sans">
-                      {isOctober ? (
-                        <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
-                          Pico Extraordinário
-                        </span>
-                      ) : (
-                        <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                          Estável
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
         </div>
       </div>
 
       {/* DETALHAMENTO DE TRANSAÇÕES E GASTOS ATÍPICOS DE OUTUBRO */}
-      <div className="glass-panel rounded-2xl p-6 shadow-xl space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-gray-800">
+      <div className="bg-white dark:bg-[#111318] border border-slate-200 dark:border-[#1F232D] rounded-xl p-5 space-y-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-200 dark:border-[#1F232D]">
           <div>
-            <h3 className="text-base font-bold text-white">Transações Detalhadas nos Estabelecimentos</h3>
-            <p className="text-xs text-gray-400">Classificação por estabelecimento de Muriaé e detecção de atípicos</p>
+            <h3 className="text-xs font-mono font-bold text-slate-900 dark:text-zinc-200 uppercase tracking-wide">Transações Detalhadas nos Estabelecimentos</h3>
+            <p className="text-xs text-slate-500 dark:text-zinc-400">Classificação por estabelecimento de Muriaé e detecção de atípicos</p>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400 font-semibold">Filtrar Cartão:</span>
+            <span className="text-xs font-mono text-slate-500 dark:text-zinc-400">Filtrar Cartão:</span>
             <select
               value={selectedCardFilter}
               onChange={(e) => setSelectedCardFilter(e.target.value)}
-              className="bg-gray-900 text-xs text-gray-200 border border-gray-700 rounded-xl px-3 py-1.5 focus:outline-none focus:border-emerald-500 transition"
+              className="bg-slate-50 dark:bg-[#0D0F14] text-xs font-mono text-slate-900 dark:text-zinc-200 border border-slate-300 dark:border-[#2B303E] rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 transition cursor-pointer"
             >
               <option value="ALL">Todos os 3 Cartões</option>
               <option value="card-nubank">Nubank Roxo</option>
@@ -327,68 +220,80 @@ export function CardsAuditView({
           </div>
         </div>
 
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {filteredTransactions.map((tx) => (
             <div
               key={tx.id}
-              className={`p-3.5 sm:p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${
+              className={`p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all ${
                 tx.isAtypical
-                  ? 'bg-amber-950/20 border-amber-500/40 shadow-sm'
-                  : 'bg-gray-900/80 border-gray-800 hover:border-gray-700'
+                  ? 'bg-amber-50/60 border-amber-200 dark:bg-amber-950/20 dark:border-amber-600/30'
+                  : 'bg-white dark:bg-[#12141B] border-slate-200 dark:border-[#1F232D] hover:border-slate-300'
               }`}
             >
               <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-xl shrink-0 mt-0.5 ${
-                  tx.isAtypical ? 'bg-amber-500/20 text-amber-400' : 'bg-gray-800 text-gray-300'
+                <div className={`p-2 rounded-lg shrink-0 mt-0.5 ${
+                  tx.isAtypical 
+                    ? 'bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-400 dark:border-amber-800/40' 
+                    : 'bg-slate-100 text-slate-600 border border-slate-200 dark:bg-[#191D27] dark:text-zinc-400 dark:border-[#2B3142]'
                 }`}>
                   {tx.isAtypical ? <Wrench className="w-4 h-4" /> : <Store className="w-4 h-4" />}
                 </div>
 
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-bold text-white">{tx.establishment}</span>
-                    <span className="text-[10px] text-gray-400 bg-gray-800 px-2 py-0.5 rounded-full">
+                    <span className="text-xs font-bold text-slate-900 dark:text-zinc-100">{tx.establishment}</span>
+                    <span className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 bg-slate-100 dark:bg-[#161922] px-2 py-0.5 rounded border border-slate-200 dark:border-[#242A38]">
                       {tx.category}
                     </span>
-                    <span className="text-[10px] font-semibold text-purple-300 bg-purple-950/60 px-2 py-0.5 rounded-full border border-purple-500/20">
+                    <span className="text-[10px] font-mono font-semibold text-purple-700 bg-purple-50 border border-purple-200 dark:text-purple-300 dark:bg-purple-950/60 dark:border-purple-800/40 px-2 py-0.5 rounded">
                       {tx.cardName}
                     </span>
                     {tx.installmentInfo && (
-                      <span className="text-[10px] text-gray-400 font-mono">
+                      <span className="text-[10px] text-slate-500 dark:text-zinc-500 font-mono">
                         {tx.installmentInfo}
                       </span>
                     )}
                   </div>
 
                   {tx.isAtypical ? (
-                    <p className="text-xs text-amber-300/90 font-medium mt-1">
+                    <p className="text-[11px] text-amber-800 dark:text-amber-300 font-mono mt-1 font-semibold">
                       ⚠ ATÍPICO: {tx.atypicalReason}
                     </p>
                   ) : (
-                    <p className="text-[11px] text-gray-400 mt-0.5">
-                      Data da compra: {tx.transactionDate} • Despesa ordinária compartilhada
+                    <p className="text-[11px] text-slate-500 dark:text-zinc-500 font-mono mt-0.5">
+                      {tx.transactionDate} • Despesa ordinária compartilhada
                     </p>
                   )}
                 </div>
               </div>
 
-              <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 pt-2 sm:pt-0 border-gray-800">
-                <span className={`text-base font-bold font-mono ${tx.isAtypical ? 'text-amber-300' : 'text-white'}`}>
+              <div className="flex sm:flex-row items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-100 dark:border-[#1F232D]">
+                <span className={`text-base font-bold font-mono tabular-nums ${tx.isAtypical ? 'text-amber-700 dark:text-amber-300' : 'text-slate-900 dark:text-zinc-100'}`}>
                   {formatBRL(tx.amount)}
                 </span>
                 
-                {tx.isAtypical && (
-                  <span className="text-[10px] uppercase font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full mt-1">
-                    Não Repetível
-                  </span>
-                )}
+                <button
+                  onClick={() => handleDelete(tx.id, tx.establishment)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:text-zinc-500 dark:hover:text-rose-400 dark:hover:bg-rose-950/40 transition cursor-pointer"
+                  title="Excluir lançamento"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             </div>
           ))}
         </div>
       </div>
 
+      {/* Modal de Importação de Extratos */}
+      <StatementImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onSuccess={() => {
+          if (onRefresh) onRefresh();
+        }}
+      />
+
     </div>
   );
 }
-

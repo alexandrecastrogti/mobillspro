@@ -7,7 +7,8 @@
     "fellowshipAlexandre": 1100,
     "totalIncomeAlexandre": 11096.21,
     "wellhubReimbursementTotal": 549.9,
-    "currentMonth": "2026-10"
+    "currentMonth": "2026-10",
+    "device": "iPhone 17 Pro Max (iOS 20)"
   },
   "incomes": [
     {
@@ -198,7 +199,7 @@
     {
       "id": "fix-9",
       "title": "Academia Alexandre (Exclusivo)",
-      "category": "Saúde & Fitness",
+      "category": "Saúde & Fitness (Alexandre)",
       "totalAmount": 140,
       "alexandreShare": 140,
       "amandaShare": 0,
@@ -216,547 +217,54 @@
   "creditCards": [
     {
       "id": "card-nubank",
-      "cardName": "Nubank",
+      "cardName": "Nubank Ultravioleta",
+      "brand": "Mastercard Black",
       "color": "purple",
       "closingDay": 24,
       "dueDay": 1,
+      "bestBuyDay": 25,
       "creditLimit": 14000,
-      "themeClass": "from-purple-900 to-indigo-950 border-purple-500/40"
+      "usedLimit": 2425.9,
+      "availableLimit": 11574.1,
+      "currentInvoice": 2005.9,
+      "invoiceStatus": "FECHADA",
+      "nextInvoiceEstimated": 420,
+      "themeClass": "from-purple-950 via-indigo-950 to-gray-950 border-purple-500/40",
+      "notes": "Melhor dia para compras: Dia 25. Vencimento no 1º dia do mês seguinte."
     },
     {
       "id": "card-bradesco",
-      "cardName": "Bradesco",
+      "cardName": "Bradesco Visa Platinum",
+      "brand": "Visa Platinum",
       "color": "red",
       "closingDay": 18,
       "dueDay": 25,
+      "bestBuyDay": 19,
       "creditLimit": 18500,
-      "themeClass": "from-red-950 to-rose-950 border-red-500/40"
+      "usedLimit": 1780,
+      "availableLimit": 16720,
+      "currentInvoice": 1780,
+      "invoiceStatus": "ABERTA",
+      "nextInvoiceEstimated": 0,
+      "themeClass": "from-red-950 via-rose-950 to-gray-950 border-red-500/40",
+      "notes": "Última parcela 10/10 encerrada em Outubro. Sem parcelamentos a partir de Novembro!"
     },
     {
       "id": "card-mercadopago",
-      "cardName": "Mercado Pago",
+      "cardName": "Mercado Pago Visa",
+      "brand": "Visa",
       "color": "sky",
       "closingDay": 10,
       "dueDay": 17,
+      "bestBuyDay": 11,
       "creditLimit": 8500,
-      "themeClass": "from-sky-950 to-blue-950 border-sky-500/40"
-    }
-  ],
-  "monthlyAuditSummary": [
-    {
-      "month": "2026-05",
-      "label": "Maio 2026",
-      "supermarketTotal": 1490.8,
-      "supermarketBreakdown": {
-        "bh": 680.4,
-        "bahamas": 520.3,
-        "topfrut": 290.1
-      },
-      "nubankTotal": 1120.5,
-      "bradescoTotal": 1480.2,
-      "mercadoPagoTotal": 490.1,
-      "totalCards": 3090.8,
-      "atypicalAmount": 0,
-      "notes": "Mês regular dentro da média histórica"
-    },
-    {
-      "month": "2026-06",
-      "label": "Junho 2026",
-      "supermarketTotal": 1515.7,
-      "supermarketBreakdown": {
-        "bh": 710,
-        "bahamas": 490.5,
-        "topfrut": 315.2
-      },
-      "nubankTotal": 1080.4,
-      "bradescoTotal": 1520.1,
-      "mercadoPagoTotal": 440,
-      "totalCards": 3040.5,
-      "atypicalAmount": 0,
-      "notes": "Gastos de mercado alinhados à média"
-    },
-    {
-      "month": "2026-07",
-      "label": "Julho 2026",
-      "supermarketTotal": 1520.7,
-      "supermarketBreakdown": {
-        "bh": 695.2,
-        "bahamas": 540.1,
-        "topfrut": 285.4
-      },
-      "nubankTotal": 1240.8,
-      "bradescoTotal": 1410,
-      "mercadoPagoTotal": 510.2,
-      "totalCards": 3161,
-      "atypicalAmount": 0,
-      "notes": "Mês estável"
-    },
-    {
-      "month": "2026-08",
-      "label": "Agosto 2026",
-      "supermarketTotal": 1560,
-      "supermarketBreakdown": {
-        "bh": 720,
-        "bahamas": 510,
-        "topfrut": 330
-      },
-      "nubankTotal": 1190,
-      "bradescoTotal": 1480,
-      "mercadoPagoTotal": 480,
-      "totalCards": 3150,
-      "atypicalAmount": 0,
-      "notes": "Pequena variação de reposição de despensa"
-    },
-    {
-      "month": "2026-09",
-      "label": "Setembro 2026",
-      "supermarketTotal": 1512.1,
-      "supermarketBreakdown": {
-        "bh": 705.5,
-        "bahamas": 505,
-        "topfrut": 301.6
-      },
-      "nubankTotal": 1150.3,
-      "bradescoTotal": 1480,
-      "mercadoPagoTotal": 460,
-      "totalCards": 3090.3,
-      "atypicalAmount": 0,
-      "notes": "Penúltima parcela no Bradesco (9/10)"
-    },
-    {
-      "month": "2026-10",
-      "label": "Outubro 2026",
-      "supermarketTotal": 2600.1,
-      "supermarketBreakdown": {
-        "bh": 1250.5,
-        "bahamas": 890.6,
-        "topfrut": 459
-      },
-      "nubankTotal": 1820.4,
-      "bradescoTotal": 1780,
-      "mercadoPagoTotal": 1520,
-      "totalCards": 5120.4,
-      "atypicalAmount": 1480,
-      "notes": "PICO ATÍPICO DE OUTUBRO: Mercado R$ 2.600,10 + Funilaria R$ 1.000 + Fim de parcelamento Bradesco"
-    }
-  ],
-  "supermarketBenchmark": {
-    "historicalAverage": 1533.28,
-    "octoberPeak": 2600.1,
-    "octoberExcess": 1066.82,
-    "atypicalTotalOctober": 1480,
-    "cleanOctoberCardsTotal": 3640.4
-  },
-  "cardTransactions": [
-    {
-      "id": "tx-c1",
-      "cardId": "card-mercadopago",
-      "cardName": "Mercado Pago",
-      "establishment": "Funilaria & Pintura Muriaé",
-      "category": "Manutenção Veículo",
-      "amount": 1000,
-      "transactionDate": "2026-10-12",
-      "installmentInfo": "1/1",
-      "isAtypical": true,
-      "atypicalReason": "Gasto atípico extraordinário (reparo colisão funilaria) que não se repetirá",
-      "referenceMonth": "2026-10",
-      "isShared": true
-    },
-    {
-      "id": "tx-c2",
-      "cardId": "card-bradesco",
-      "cardName": "Bradesco",
-      "establishment": "Casas Bahia / Eletrodoméstico",
-      "category": "Bens Duráveis",
-      "amount": 480,
-      "transactionDate": "2026-10-04",
-      "installmentInfo": "10/10 (FINALIZADO)",
-      "isAtypical": true,
-      "atypicalReason": "Última parcela (10/10) encerrada em Outubro. Não existirá a partir de Novembro.",
-      "referenceMonth": "2026-10",
-      "isShared": true
-    },
-    {
-      "id": "tx-c3",
-      "cardId": "card-nubank",
-      "cardName": "Nubank",
-      "establishment": "Supermercados BH Muriaé - Centro",
-      "category": "Supermercado",
-      "amount": 680.5,
-      "transactionDate": "2026-10-06",
-      "installmentInfo": "À vista",
-      "isAtypical": false,
-      "atypicalReason": null,
-      "referenceMonth": "2026-10",
-      "isShared": true
-    },
-    {
-      "id": "tx-c4",
-      "cardId": "card-nubank",
-      "cardName": "Nubank",
-      "establishment": "Supermercados BH Muriaé - Barra",
-      "category": "Supermercado",
-      "amount": 570,
-      "transactionDate": "2026-10-21",
-      "installmentInfo": "À vista",
-      "isAtypical": false,
-      "atypicalReason": null,
-      "referenceMonth": "2026-10",
-      "isShared": true
-    },
-    {
-      "id": "tx-c5",
-      "cardId": "card-bradesco",
-      "cardName": "Bradesco",
-      "establishment": "Bahamas Mix Muriaé",
-      "category": "Supermercado",
-      "amount": 890.6,
-      "transactionDate": "2026-10-14",
-      "installmentInfo": "À vista",
-      "isAtypical": false,
-      "atypicalReason": null,
-      "referenceMonth": "2026-10",
-      "isShared": true
-    },
-    {
-      "id": "tx-c6",
-      "cardId": "card-nubank",
-      "cardName": "Nubank",
-      "establishment": "Top Frut Gourmet Muriaé",
-      "category": "Hortifruti & Carnes",
-      "amount": 459,
-      "transactionDate": "2026-10-18",
-      "installmentInfo": "À vista",
-      "isAtypical": false,
-      "atypicalReason": null,
-      "referenceMonth": "2026-10",
-      "isShared": true
-    },
-    {
-      "id": "tx-c7",
-      "cardId": "card-nubank",
-      "cardName": "Nubank",
-      "establishment": "Farmácia Indiana Muriaé",
-      "category": "Farmácia",
-      "amount": 110.9,
-      "transactionDate": "2026-10-09",
-      "installmentInfo": "À vista",
-      "isAtypical": false,
-      "atypicalReason": null,
-      "referenceMonth": "2026-10",
-      "isShared": true
-    },
-    {
-      "id": "tx-c8",
-      "cardId": "card-bradesco",
-      "cardName": "Bradesco",
-      "establishment": "Posto Faisão Muriaé",
-      "category": "Combustível",
-      "amount": 240,
-      "transactionDate": "2026-10-11",
-      "installmentInfo": "À vista",
-      "isAtypical": false,
-      "atypicalReason": null,
-      "referenceMonth": "2026-10",
-      "isShared": true
-    },
-    {
-      "id": "tx-c9",
-      "cardId": "card-bradesco",
-      "cardName": "Bradesco",
-      "establishment": "Posto DM Combustíveis",
-      "category": "Combustível",
-      "amount": 240,
-      "transactionDate": "2026-10-25",
-      "installmentInfo": "À vista",
-      "isAtypical": false,
-      "atypicalReason": null,
-      "referenceMonth": "2026-10",
-      "isShared": true
-    },
-    {
-      "id": "tx-c10",
-      "cardId": "card-mercadopago",
-      "cardName": "Mercado Pago",
-      "establishment": "Restaurante e Churrascaria Muriaé",
-      "category": "Alimentação Fora",
-      "amount": 180,
-      "transactionDate": "2026-10-19",
-      "installmentInfo": "À vista",
-      "isAtypical": false,
-      "atypicalReason": null,
-      "referenceMonth": "2026-10",
-      "isShared": true
-    },
-    {
-      "id": "tx-c11",
-      "cardId": "card-mercadopago",
-      "cardName": "Mercado Pago",
-      "establishment": "Padaria Central Muriaé",
-      "category": "Padaria / Lanches",
-      "amount": 140,
-      "transactionDate": "2026-10-22",
-      "installmentInfo": "À vista",
-      "isAtypical": false,
-      "atypicalReason": null,
-      "referenceMonth": "2026-10",
-      "isShared": true
-    },
-    {
-      "id": "tx-c-1793473868927",
-      "cardId": "card-nubank",
-      "cardName": "Nubank Ultravioleta",
-      "establishment": "Bahamas Mix Muriaé",
-      "category": "Supermercados Muriaé",
-      "amount": 85,
-      "transactionDate": "2026-10-31",
-      "installmentInfo": "Captura Automática iPhone",
-      "isAtypical": false,
-      "atypicalReason": null,
-      "referenceMonth": "2026-10",
-      "isShared": true
-    }
-  ],
-  "pixTransactions": [
-    {
-      "id": "pix-1",
-      "direction": "ENTRADA",
-      "amount": 183.3,
-      "partyName": "Amanda (Wellhub)",
-      "category": "Reembolso Wellhub",
-      "description": "Compensação Wellhub Mensal - Amanda",
-      "transactionDate": "2026-10-02T10:14:00Z",
-      "e2eId": "E00000000202610021014a9918",
-      "isAlert": false,
-      "alertReason": "Reembolso automático cadastrado",
-      "referenceMonth": "2026-10"
-    },
-    {
-      "id": "pix-2",
-      "direction": "ENTRADA",
-      "amount": 183.3,
-      "partyName": "Taiana (Wellhub)",
-      "category": "Reembolso Wellhub",
-      "description": "Compensação Wellhub Mensal - Taiana",
-      "transactionDate": "2026-10-03T15:22:00Z",
-      "e2eId": "E00000000202610031522b7712",
-      "isAlert": false,
-      "alertReason": "Reembolso automático cadastrado",
-      "referenceMonth": "2026-10"
-    },
-    {
-      "id": "pix-3",
-      "direction": "ENTRADA",
-      "amount": 183.3,
-      "partyName": "Nilvana (Wellhub)",
-      "category": "Reembolso Wellhub",
-      "description": "Compensação Wellhub Mensal - Nilvana",
-      "transactionDate": "2026-10-04T09:40:00Z",
-      "e2eId": "E00000000202610040940c3319",
-      "isAlert": false,
-      "alertReason": "Reembolso automático cadastrado",
-      "referenceMonth": "2026-10"
-    },
-    {
-      "id": "pix-4",
-      "direction": "SAIDA",
-      "amount": 810.5,
-      "partyName": "Imobiliária Muriaé",
-      "category": "Moradia",
-      "description": "Metade Aluguel Moradia Atual Outubro/2026",
-      "transactionDate": "2026-10-09T14:20:00Z",
-      "e2eId": "E00000000202610091420d4411",
-      "isAlert": false,
-      "alertReason": "Quitação de Despesa Fixa Checklist",
-      "referenceMonth": "2026-10"
-    },
-    {
-      "id": "pix-5",
-      "direction": "SAIDA",
-      "amount": 180,
-      "partyName": "Maria da Penha (Diarista)",
-      "category": "Serviços Domésticos",
-      "description": "Faxina quinzenal residência Muriaé",
-      "transactionDate": "2026-10-28T17:00:00Z",
-      "e2eId": "E00000000202610281700e5512",
-      "isAlert": false,
-      "alertReason": "Serviço doméstico acordado",
-      "referenceMonth": "2026-10"
-    },
-    {
-      "id": "pix-6",
-      "direction": "SAIDA",
-      "amount": 190,
-      "partyName": "Energisa Minas Gerais",
-      "category": "Contas de Consumo",
-      "description": "Luz compartilhada Muriaé",
-      "transactionDate": "2026-10-18T16:30:00Z",
-      "e2eId": "E00000000202610181630f6613",
-      "isAlert": false,
-      "alertReason": "Boleto/Pix de Concessionária",
-      "referenceMonth": "2026-10"
-    },
-    {
-      "id": "pix-7",
-      "direction": "SAIDA",
-      "amount": 140,
-      "partyName": "Academia Performance Muriaé",
-      "category": "Saúde & Fitness",
-      "description": "Mensalidade Academia Alexandre Outubro",
-      "transactionDate": "2026-10-05T09:00:00Z",
-      "e2eId": "E00000000202610050900g7714",
-      "isAlert": false,
-      "alertReason": "Despesa Individual Alexandre",
-      "referenceMonth": "2026-10"
-    },
-    {
-      "id": "pix-8",
-      "direction": "SAIDA",
-      "amount": 250,
-      "partyName": "Chave Pix Celular Desconhecido",
-      "category": "Avulso / Manutenção",
-      "description": "Serviço avulso encanador reparo torneira",
-      "transactionDate": "2026-10-23T11:15:00Z",
-      "e2eId": "E00000000202610231115h8815",
-      "isAlert": true,
-      "alertReason": "DETECTOR: Pix avulso fora da rotina cadastrada de fixas",
-      "referenceMonth": "2026-10"
-    }
-  ],
-  "housingSimulation": {
-    "current": {
-      "title": "Moradia Atual (Bairro)",
-      "rentShare": 810.5,
-      "landShare": 1343.26,
-      "subtotalHousing": 2153.76,
-      "fuelCost": 480,
-      "condoShare": 70,
-      "totalMonthlyCost": 2703.76,
-      "logisticsNote": "Necessidade contínua de deslocamento de carro/moto para o Centro de Muriaé, trabalho e comércio."
-    },
-    "newCenterApartment": {
-      "title": "Apartamento Novo no Centro (CAIXA SBPE)",
-      "caixaSacFirstInstallment": 3231.32,
-      "caixaSacAmortizationPerMonth": 9.85,
-      "condoShare": 250,
-      "subtotalHousing": 3481.32,
-      "fuelCost": 120,
-      "fuelSavings": 360,
-      "netMonthlyCost": 3601.32,
-      "logisticsNote": "Localização estratégica no Centro de Muriaé: mercados (BH/Bahamas), farmácias, bancos, clínicas e trabalho acessíveis a pé.",
-      "landStrategyOptions": [
-        {
-          "id": "opt-1",
-          "name": "Venda do Terreno",
-          "description": "Quita o saldo devedor do terreno e gera liquidez imediata para amortizar a Caixa ou aportar na Nomad/Selic."
-        },
-        {
-          "id": "opt-2",
-          "name": "Manter Terreno para Construção Futura",
-          "description": "Mantém a parcela de R$ 1.343,26 como investimento patrimonial de longo prazo."
-        },
-        {
-          "id": "opt-3",
-          "name": "Locação Comercial do Terreno",
-          "description": "Renda de aluguel que subsidia a prestação."
-        }
-      ]
-    }
-  },
-  "investments": [
-    {
-      "id": "inv-1",
-      "accountName": "Conta Nomad Global (Augusto / Família)",
-      "institution": "Nomad Fintech / DriveWealth USA",
-      "assetType": "USD_OFFSHORE",
-      "currency": "USD",
-      "balanceOriginal": 4250,
-      "exchangeRate": 5.75,
-      "balanceBRL": 24437.5,
-      "annualRate": "8.5% a.a. (ETF VT + S&P 500)",
-      "monthlyYieldEst": 165,
-      "lastUpdated": "2026-10-31",
-      "notes": "Alocação dolarizada defensiva contra inflação e risco-país.",
-      "holdings": [
-        {
-          "ticker": "VT (Vanguard Total World)",
-          "allocation": "55%",
-          "valueUSD": 2337.5
-        },
-        {
-          "ticker": "VOO (Vanguard S&P 500)",
-          "allocation": "30%",
-          "valueUSD": 1275
-        },
-        {
-          "ticker": "Cash Dólar Rendendo",
-          "allocation": "15%",
-          "valueUSD": 637.5
-        }
-      ]
-    },
-    {
-      "id": "inv-2",
-      "accountName": "Tesouro Selic 2029",
-      "institution": "Tesouro Direto / Itaú",
-      "assetType": "RENDA_FIXA_POS",
-      "currency": "BRL",
-      "balanceOriginal": 35000,
-      "exchangeRate": 1,
-      "balanceBRL": 35000,
-      "annualRate": "13.75% a.a. (Taxa Selic Meta)",
-      "monthlyYieldEst": 375,
-      "lastUpdated": "2026-10-31",
-      "notes": "Reserva de emergência principal e liquidez garantida pelo Tesouro Nacional.",
-      "holdings": [
-        {
-          "ticker": "LFT (Tesouro Selic 2029)",
-          "allocation": "100%",
-          "valueBRL": 35000
-        }
-      ]
-    },
-    {
-      "id": "inv-3",
-      "accountName": "CDB 110% CDI Liquidez Diária",
-      "institution": "Nubank / Bradesco",
-      "assetType": "RENDA_FIXA_POS",
-      "currency": "BRL",
-      "balanceOriginal": 18450,
-      "exchangeRate": 1,
-      "balanceBRL": 18450,
-      "annualRate": "15.12% a.a. (110% do CDI)",
-      "monthlyYieldEst": 215,
-      "lastUpdated": "2026-10-31",
-      "notes": "Colchão para amortizações extraordinárias e pagamentos à vista.",
-      "holdings": [
-        {
-          "ticker": "CDB Pós-Fixado DI",
-          "allocation": "100%",
-          "valueBRL": 18450
-        }
-      ]
-    },
-    {
-      "id": "inv-4",
-      "accountName": "Terreno Residencial Muriaé (Fração Paga)",
-      "institution": "Loteadora Muriaé",
-      "assetType": "PATRIMONIO_IMOVEL",
-      "currency": "BRL",
-      "balanceOriginal": 48500,
-      "exchangeRate": 1,
-      "balanceBRL": 48500,
-      "annualRate": "Apreciação imobiliária ~10% a.a.",
-      "monthlyYieldEst": 0,
-      "lastUpdated": "2026-10-31",
-      "notes": "Total de parcelas quitadas até o momento que compõem o patrimônio líquido da família.",
-      "holdings": [
-        {
-          "ticker": "Lote Residencial Urbano",
-          "allocation": "100%",
-          "valueBRL": 48500
-        }
-      ]
+      "usedLimit": 1520,
+      "availableLimit": 6980,
+      "currentInvoice": 1520,
+      "invoiceStatus": "FECHADA",
+      "nextInvoiceEstimated": 250,
+      "themeClass": "from-sky-950 via-blue-950 to-gray-950 border-sky-500/40",
+      "notes": "Contém a despesa atípica de funilaria (R$ 1.000,00) que já foi quitada."
     }
   ],
   "budgets": [
@@ -953,19 +461,388 @@
       "nomadUSD": 4250
     }
   ],
-  "smsPushCaptures": [
+  "monthlyAuditSummary": [
     {
-      "id": "sms-1793473868926",
-      "source": "iPhone 17 Pro Max Simulator",
-      "rawText": "Compra de R$ 85,00 aprovada no Nubank em BAHAMAS MIX MURIAE",
-      "parsedAmount": 85,
-      "parsedMerchant": "Bahamas Mix Muriaé",
-      "detectedCard": "Nubank Ultravioleta",
-      "assignedCategory": "Supermercados Muriaé",
-      "capturedAt": "2026-10-31T19:11:08.926Z",
-      "status": "SYNCED",
-      "device": "iPhone 17 Pro Max"
+      "month": "2026-05",
+      "label": "Maio 2026",
+      "supermarketTotal": 1490.8,
+      "supermarketBreakdown": {
+        "bh": 680.4,
+        "bahamas": 520.3,
+        "topfrut": 290.1
+      },
+      "nubankTotal": 1120.5,
+      "bradescoTotal": 1480.2,
+      "mercadoPagoTotal": 490.1,
+      "totalCards": 3090.8,
+      "atypicalAmount": 0,
+      "notes": "Mês regular dentro da média histórica"
     },
+    {
+      "month": "2026-06",
+      "label": "Junho 2026",
+      "supermarketTotal": 1515.7,
+      "supermarketBreakdown": {
+        "bh": 710,
+        "bahamas": 490.5,
+        "topfrut": 315.2
+      },
+      "nubankTotal": 1080.4,
+      "bradescoTotal": 1520.1,
+      "mercadoPagoTotal": 440,
+      "totalCards": 3040.5,
+      "atypicalAmount": 0,
+      "notes": "Gastos de mercado alinhados à média"
+    },
+    {
+      "month": "2026-07",
+      "label": "Julho 2026",
+      "supermarketTotal": 1520.7,
+      "supermarketBreakdown": {
+        "bh": 695.2,
+        "bahamas": 540.1,
+        "topfrut": 285.4
+      },
+      "nubankTotal": 1240.8,
+      "bradescoTotal": 1410,
+      "mercadoPagoTotal": 510.2,
+      "totalCards": 3161,
+      "atypicalAmount": 0,
+      "notes": "Mês estável"
+    },
+    {
+      "month": "2026-08",
+      "label": "Agosto 2026",
+      "supermarketTotal": 1560,
+      "supermarketBreakdown": {
+        "bh": 720,
+        "bahamas": 510,
+        "topfrut": 330
+      },
+      "nubankTotal": 1190,
+      "bradescoTotal": 1480,
+      "mercadoPagoTotal": 480,
+      "totalCards": 3150,
+      "atypicalAmount": 0,
+      "notes": "Pequena variação de reposição de despensa"
+    },
+    {
+      "month": "2026-09",
+      "label": "Setembro 2026",
+      "supermarketTotal": 1512.1,
+      "supermarketBreakdown": {
+        "bh": 705.5,
+        "bahamas": 505,
+        "topfrut": 301.6
+      },
+      "nubankTotal": 1150.3,
+      "bradescoTotal": 1480,
+      "mercadoPagoTotal": 460,
+      "totalCards": 3090.3,
+      "atypicalAmount": 0,
+      "notes": "Penúltima parcela no Bradesco (9/10)"
+    },
+    {
+      "month": "2026-10",
+      "label": "Outubro 2026",
+      "supermarketTotal": 2600.1,
+      "supermarketBreakdown": {
+        "bh": 1250.5,
+        "bahamas": 890.6,
+        "topfrut": 459
+      },
+      "nubankTotal": 1820.4,
+      "bradescoTotal": 1780,
+      "mercadoPagoTotal": 1520,
+      "totalCards": 5120.4,
+      "atypicalAmount": 1480,
+      "notes": "PICO ATÍPICO DE OUTUBRO: Mercado R$ 2.600,10 + Funilaria R$ 1.000 + Fim de parcelamento Bradesco"
+    }
+  ],
+  "supermarketBenchmark": {
+    "historicalAverage": 1533.28,
+    "octoberPeak": 2600.1,
+    "octoberExcess": 1066.82,
+    "atypicalTotalOctober": 1480,
+    "cleanOctoberCardsTotal": 3640.4
+  },
+  "cardTransactions": [
+    {
+      "id": "tx-c1",
+      "cardId": "card-mercadopago",
+      "cardName": "Mercado Pago",
+      "establishment": "Funilaria & Pintura Muriaé",
+      "category": "Manutenção Veículo",
+      "amount": 1000,
+      "transactionDate": "2026-10-12",
+      "installmentInfo": "1/1",
+      "isAtypical": true,
+      "atypicalReason": "Gasto atípico extraordinário (reparo colisão funilaria) que não se repetirá",
+      "referenceMonth": "2026-10",
+      "isShared": true
+    },
+    {
+      "id": "tx-c2",
+      "cardId": "card-bradesco",
+      "cardName": "Bradesco",
+      "establishment": "Casas Bahia / Eletrodoméstico",
+      "category": "Bens Duráveis",
+      "amount": 480,
+      "transactionDate": "2026-10-04",
+      "installmentInfo": "10/10 (FINALIZADO)",
+      "isAtypical": true,
+      "atypicalReason": "Última parcela (10/10) encerrada em Outubro. Não existirá a partir de Novembro.",
+      "referenceMonth": "2026-10",
+      "isShared": true
+    },
+    {
+      "id": "tx-c3",
+      "cardId": "card-nubank",
+      "cardName": "Nubank",
+      "establishment": "Supermercados BH Muriaé - Centro",
+      "category": "Supermercados Muriaé",
+      "amount": 680.5,
+      "transactionDate": "2026-10-06",
+      "installmentInfo": "À vista",
+      "isAtypical": false,
+      "atypicalReason": null,
+      "referenceMonth": "2026-10",
+      "isShared": true
+    },
+    {
+      "id": "tx-c4",
+      "cardId": "card-nubank",
+      "cardName": "Nubank",
+      "establishment": "Supermercados BH Muriaé - Barra",
+      "category": "Supermercados Muriaé",
+      "amount": 570,
+      "transactionDate": "2026-10-21",
+      "installmentInfo": "À vista",
+      "isAtypical": false,
+      "atypicalReason": null,
+      "referenceMonth": "2026-10",
+      "isShared": true
+    },
+    {
+      "id": "tx-c5",
+      "cardId": "card-bradesco",
+      "cardName": "Bradesco",
+      "establishment": "Bahamas Mix Muriaé",
+      "category": "Supermercados Muriaé",
+      "amount": 890.6,
+      "transactionDate": "2026-10-14",
+      "installmentInfo": "À vista",
+      "isAtypical": false,
+      "atypicalReason": null,
+      "referenceMonth": "2026-10",
+      "isShared": true
+    },
+    {
+      "id": "tx-c6",
+      "cardId": "card-nubank",
+      "cardName": "Nubank",
+      "establishment": "Top Frut Gourmet Muriaé",
+      "category": "Supermercados Muriaé",
+      "amount": 459,
+      "transactionDate": "2026-10-18",
+      "installmentInfo": "À vista",
+      "isAtypical": false,
+      "atypicalReason": null,
+      "referenceMonth": "2026-10",
+      "isShared": true
+    },
+    {
+      "id": "tx-c7",
+      "cardId": "card-nubank",
+      "cardName": "Nubank",
+      "establishment": "Farmácia Indiana Muriaé",
+      "category": "Farmácia & Medicamentos",
+      "amount": 110.9,
+      "transactionDate": "2026-10-09",
+      "installmentInfo": "À vista",
+      "isAtypical": false,
+      "atypicalReason": null,
+      "referenceMonth": "2026-10",
+      "isShared": true
+    },
+    {
+      "id": "tx-c8",
+      "cardId": "card-bradesco",
+      "cardName": "Bradesco",
+      "establishment": "Posto Faisão Muriaé",
+      "category": "Combustível & Transporte",
+      "amount": 240,
+      "transactionDate": "2026-10-11",
+      "installmentInfo": "À vista",
+      "isAtypical": false,
+      "atypicalReason": null,
+      "referenceMonth": "2026-10",
+      "isShared": true
+    },
+    {
+      "id": "tx-c9",
+      "cardId": "card-bradesco",
+      "cardName": "Bradesco",
+      "establishment": "Posto DM Combustíveis",
+      "category": "Combustível & Transporte",
+      "amount": 240,
+      "transactionDate": "2026-10-25",
+      "installmentInfo": "À vista",
+      "isAtypical": false,
+      "atypicalReason": null,
+      "referenceMonth": "2026-10",
+      "isShared": true
+    },
+    {
+      "id": "tx-c10",
+      "cardId": "card-mercadopago",
+      "cardName": "Mercado Pago",
+      "establishment": "Restaurante e Churrascaria Muriaé",
+      "category": "Alimentação Fora & Restaurantes",
+      "amount": 180,
+      "transactionDate": "2026-10-19",
+      "installmentInfo": "À vista",
+      "isAtypical": false,
+      "atypicalReason": null,
+      "referenceMonth": "2026-10",
+      "isShared": true
+    },
+    {
+      "id": "tx-c11",
+      "cardId": "card-mercadopago",
+      "cardName": "Mercado Pago",
+      "establishment": "Padaria Central Muriaé",
+      "category": "Alimentação Fora & Restaurantes",
+      "amount": 140,
+      "transactionDate": "2026-10-22",
+      "installmentInfo": "À vista",
+      "isAtypical": false,
+      "atypicalReason": null,
+      "referenceMonth": "2026-10",
+      "isShared": true
+    },
+    {
+      "id": "tx-imp-1793630906870-8jqo5",
+      "cardId": "card-nubank",
+      "cardName": "Nubank Ultravioleta",
+      "establishment": "BAHAMAS MIX MURIAE",
+      "category": "Supermercados Muriaé",
+      "amount": 185.5,
+      "transactionDate": "2026-10-22",
+      "installmentInfo": "Importado via Extrato",
+      "isAtypical": false,
+      "atypicalReason": null,
+      "referenceMonth": "2026-10",
+      "isShared": true
+    }
+  ],
+  "pixTransactions": [
+    {
+      "id": "pix-1",
+      "direction": "ENTRADA",
+      "amount": 183.3,
+      "partyName": "Amanda (Wellhub)",
+      "category": "Reembolso Wellhub",
+      "description": "Compensação Wellhub Mensal - Amanda",
+      "transactionDate": "2026-10-02T10:14:00Z",
+      "e2eId": "E00000000202610021014a9918",
+      "isAlert": false,
+      "alertReason": "Reembolso automático cadastrado",
+      "referenceMonth": "2026-10"
+    },
+    {
+      "id": "pix-2",
+      "direction": "ENTRADA",
+      "amount": 183.3,
+      "partyName": "Taiana (Wellhub)",
+      "category": "Reembolso Wellhub",
+      "description": "Compensação Wellhub Mensal - Taiana",
+      "transactionDate": "2026-10-03T15:22:00Z",
+      "e2eId": "E00000000202610031522b7712",
+      "isAlert": false,
+      "alertReason": "Reembolso automático cadastrado",
+      "referenceMonth": "2026-10"
+    },
+    {
+      "id": "pix-3",
+      "direction": "ENTRADA",
+      "amount": 183.3,
+      "partyName": "Nilvana (Wellhub)",
+      "category": "Reembolso Wellhub",
+      "description": "Compensação Wellhub Mensal - Nilvana",
+      "transactionDate": "2026-10-04T09:40:00Z",
+      "e2eId": "E00000000202610040940c3319",
+      "isAlert": false,
+      "alertReason": "Reembolso automático cadastrado",
+      "referenceMonth": "2026-10"
+    },
+    {
+      "id": "pix-4",
+      "direction": "SAIDA",
+      "amount": 810.5,
+      "partyName": "Imobiliária Muriaé",
+      "category": "Moradia",
+      "description": "Metade Aluguel Moradia Atual Outubro/2026",
+      "transactionDate": "2026-10-09T14:20:00Z",
+      "e2eId": "E00000000202610091420d4411",
+      "isAlert": false,
+      "alertReason": "Quitação de Despesa Fixa Checklist",
+      "referenceMonth": "2026-10"
+    },
+    {
+      "id": "pix-5",
+      "direction": "SAIDA",
+      "amount": 180,
+      "partyName": "Maria da Penha (Diarista)",
+      "category": "Serviços Domésticos",
+      "description": "Faxina quinzenal residência Muriaé",
+      "transactionDate": "2026-10-28T17:00:00Z",
+      "e2eId": "E00000000202610281700e5512",
+      "isAlert": false,
+      "alertReason": "Serviço doméstico acordado",
+      "referenceMonth": "2026-10"
+    },
+    {
+      "id": "pix-6",
+      "direction": "SAIDA",
+      "amount": 190,
+      "partyName": "Energisa Minas Gerais",
+      "category": "Contas de Consumo",
+      "description": "Luz compartilhada Muriaé",
+      "transactionDate": "2026-10-18T16:30:00Z",
+      "e2eId": "E00000000202610181630f6613",
+      "isAlert": false,
+      "alertReason": "Boleto/Pix de Concessionária",
+      "referenceMonth": "2026-10"
+    },
+    {
+      "id": "pix-7",
+      "direction": "SAIDA",
+      "amount": 140,
+      "partyName": "Academia Performance Muriaé",
+      "category": "Saúde & Fitness (Alexandre)",
+      "description": "Mensalidade Academia Alexandre Outubro",
+      "transactionDate": "2026-10-05T09:00:00Z",
+      "e2eId": "E00000000202610050900g7714",
+      "isAlert": false,
+      "alertReason": "Despesa Individual Alexandre",
+      "referenceMonth": "2026-10"
+    },
+    {
+      "id": "pix-8",
+      "direction": "SAIDA",
+      "amount": 250,
+      "partyName": "Chave Pix Celular Desconhecido",
+      "category": "Avulso / Manutenção",
+      "description": "Serviço avulso encanador reparo torneira",
+      "transactionDate": "2026-10-23T11:15:00Z",
+      "e2eId": "E00000000202610231115h8815",
+      "isAlert": true,
+      "alertReason": "DETECTOR: Pix avulso fora da rotina cadastrada de fixas",
+      "referenceMonth": "2026-10"
+    }
+  ],
+  "smsPushCaptures": [
     {
       "id": "sms-1",
       "source": "Nubank Push",
@@ -1001,6 +878,143 @@
       "capturedAt": "2026-10-24T08:46:00Z",
       "status": "SYNCED",
       "device": "iPhone 17 Pro Max"
+    }
+  ],
+  "housingSimulation": {
+    "current": {
+      "title": "Moradia Atual (Bairro)",
+      "rentShare": 810.5,
+      "landShare": 1343.26,
+      "subtotalHousing": 2153.76,
+      "fuelCost": 480,
+      "condoShare": 70,
+      "totalMonthlyCost": 2703.76,
+      "logisticsNote": "Necessidade contínua de deslocamento de carro/moto para o Centro de Muriaé, trabalho e comércio."
+    },
+    "newCenterApartment": {
+      "title": "Apartamento Novo no Centro (CAIXA SBPE SAC)",
+      "caixaRate": "10.65% a.a. + TR (Taxa SBPE Caixa)",
+      "caixaSacFirstInstallment": 3231.32,
+      "caixaSacAmortizationPerMonth": 9.85,
+      "condoShare": 250,
+      "subtotalHousing": 3481.32,
+      "fuelCost": 120,
+      "fuelSavings": 360,
+      "netMonthlyCost": 3601.32,
+      "logisticsNote": "Localização estratégica no Centro de Muriaé: mercados (BH/Bahamas), farmácias, bancos, clínicas e trabalho acessíveis a pé.",
+      "landStrategyOptions": [
+        {
+          "id": "opt-1",
+          "name": "Venda do Terreno",
+          "description": "Quita o saldo devedor do terreno e gera liquidez imediata para amortizar a Caixa ou aportar na Nomad/Selic."
+        },
+        {
+          "id": "opt-2",
+          "name": "Manter Terreno para Construção Futura",
+          "description": "Mantém a parcela de R$ 1.343,26 como investimento patrimonial de longo prazo."
+        },
+        {
+          "id": "opt-3",
+          "name": "Locação Comercial do Terreno",
+          "description": "Renda de aluguel que subsidia a prestação."
+        }
+      ]
+    }
+  },
+  "investments": [
+    {
+      "id": "inv-1",
+      "accountName": "Conta Nomad Global (Augusto / Família)",
+      "institution": "Nomad Fintech / DriveWealth USA",
+      "assetType": "USD_OFFSHORE",
+      "currency": "USD",
+      "balanceOriginal": 4250,
+      "exchangeRate": 5.75,
+      "balanceBRL": 24437.5,
+      "annualRate": "8.5% a.a. (ETF VT + S&P 500)",
+      "monthlyYieldEst": 165,
+      "lastUpdated": "2026-10-31",
+      "notes": "Alocação dolarizada defensiva contra inflação e risco-país.",
+      "holdings": [
+        {
+          "ticker": "VT (Vanguard Total World)",
+          "allocation": "55%",
+          "valueUSD": 2337.5
+        },
+        {
+          "ticker": "VOO (Vanguard S&P 500)",
+          "allocation": "30%",
+          "valueUSD": 1275
+        },
+        {
+          "ticker": "Cash Dólar Rendendo",
+          "allocation": "15%",
+          "valueUSD": 637.5
+        }
+      ]
+    },
+    {
+      "id": "inv-2",
+      "accountName": "Tesouro Selic 2029",
+      "institution": "Tesouro Direto / Itaú",
+      "assetType": "RENDA_FIXA_POS",
+      "currency": "BRL",
+      "balanceOriginal": 35000,
+      "exchangeRate": 1,
+      "balanceBRL": 35000,
+      "annualRate": "13.75% a.a. (Taxa Selic Meta)",
+      "monthlyYieldEst": 375,
+      "lastUpdated": "2026-10-31",
+      "notes": "Reserva de emergência principal e liquidez garantida pelo Tesouro Nacional.",
+      "holdings": [
+        {
+          "ticker": "LFT (Tesouro Selic 2029)",
+          "allocation": "100%",
+          "valueBRL": 35000
+        }
+      ]
+    },
+    {
+      "id": "inv-3",
+      "accountName": "CDB 110% CDI Liquidez Diária",
+      "institution": "Nubank / Bradesco",
+      "assetType": "RENDA_FIXA_POS",
+      "currency": "BRL",
+      "balanceOriginal": 18450,
+      "exchangeRate": 1,
+      "balanceBRL": 18450,
+      "annualRate": "15.12% a.a. (110% do CDI)",
+      "monthlyYieldEst": 215,
+      "lastUpdated": "2026-10-31",
+      "notes": "Colchão para amortizações extraordinárias e pagamentos à vista.",
+      "holdings": [
+        {
+          "ticker": "CDB Pós-Fixado DI",
+          "allocation": "100%",
+          "valueBRL": 18450
+        }
+      ]
+    },
+    {
+      "id": "inv-4",
+      "accountName": "Terreno Residencial Muriaé (Fração Paga)",
+      "institution": "Loteadora Muriaé",
+      "assetType": "PATRIMONIO_IMOVEL",
+      "currency": "BRL",
+      "balanceOriginal": 48500,
+      "exchangeRate": 1,
+      "balanceBRL": 48500,
+      "annualRate": "Apreciação imobiliária ~10% a.a.",
+      "monthlyYieldEst": 0,
+      "lastUpdated": "2026-10-31",
+      "notes": "Total de parcelas quitadas até o momento que compõem o patrimônio líquido da família.",
+      "holdings": [
+        {
+          "ticker": "Lote Residencial Urbano",
+          "allocation": "100%",
+          "valueBRL": 48500
+        }
+      ]
     }
   ]
 }

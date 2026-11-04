@@ -1,16 +1,7 @@
-const CACHE_NAME = 'mobillspro-v1';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json'
-];
+// MobillsPro Service Worker - Auto-cleanup and Network First
+const CACHE_NAME = 'mobillspro-v2';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache);
-    })
-  );
   self.skipWaiting();
 });
 
@@ -18,28 +9,17 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
+        cacheNames.map((name) => caches.delete(name))
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
-  // Let API requests pass directly to network
-  if (event.request.url.includes('/api/')) {
-    return;
-  }
+  // Always fetch fresh from network in dev/modern PWA
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request).catch(() => {
-        return caches.match('/index.html');
-      });
+    fetch(event.request).catch(() => {
+      return caches.match(event.request);
     })
   );
 });
-

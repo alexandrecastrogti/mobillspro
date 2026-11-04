@@ -1,5 +1,6 @@
 import express from 'express';
 import { db } from '../db.js';
+import { calculateBudget503020 } from '../financeEngine.js';
 
 const router = express.Router();
 
@@ -44,9 +45,17 @@ router.get('/dashboard/summary', (req, res) => {
   const nomadAsset = investments.find(i => i.assetType === 'USD_OFFSHORE');
   const pixAlerts = pixList.filter(p => p.isAlert);
 
+  const budget503020 = calculateBudget503020(
+    balance.inflow,
+    balance.outflowFixed,
+    balance.outflowCards + (balance.outflowPix || 0),
+    2000.00
+  );
+
   res.json({
     profile,
     balance,
+    budget503020,
     cardsAuditSummary: cardsAudit.supermarketBenchmark,
     investmentsSummary: {
       totalNetWorthBRL,
@@ -67,9 +76,14 @@ router.get('/dashboard/summary', (req, res) => {
   });
 });
 
-// Budgets (Metas por Centro de Custo)
+// Budgets (Metas por Centro de Custo) - CRUD Completo
 router.get('/budgets', (req, res) => {
   res.json(db.getBudgets());
+});
+
+router.post('/budgets', (req, res) => {
+  const created = db.addBudget(req.body);
+  res.status(201).json(created);
 });
 
 router.put('/budgets/:id', (req, res) => {
@@ -78,9 +92,21 @@ router.put('/budgets/:id', (req, res) => {
   res.json(updated);
 });
 
-// Credit Cards Detailed (Invoices, Timeline, Limits)
+router.delete('/budgets/:id', (req, res) => {
+  const deleted = db.deleteBudget(req.params.id);
+  if (!deleted) return res.status(404).json({ error: "Meta não encontrada" });
+  res.json({ success: true });
+});
+
+// Credit Cards & Transactions - CRUD Completo
 router.get('/cards/detailed', (req, res) => {
   res.json(db.getCreditCardsDetailed());
+});
+
+router.put('/cards/:id', (req, res) => {
+  const updated = db.updateCreditCard(req.params.id, req.body);
+  if (!updated) return res.status(404).json({ error: "Cartão não encontrado" });
+  res.json(updated);
 });
 
 router.get('/cards/audit', (req, res) => {
@@ -93,10 +119,37 @@ router.get('/cards/transactions', (req, res) => {
   res.json(db.getCardTransactions(month, cardId));
 });
 
+router.post('/cards/transactions', (req, res) => {
+  const created = db.addCardTransaction(req.body);
+  res.status(201).json(created);
+});
+
+router.delete('/cards/transactions/:id', (req, res) => {
+  const deleted = db.deleteCardTransaction(req.params.id);
+  if (!deleted) return res.status(404).json({ error: "Transação não encontrada" });
+  res.json({ success: true });
+});
+
 router.patch('/cards/transactions/:id/toggle-atypical', (req, res) => {
   const updated = db.toggleAtypicalTransaction(req.params.id);
   if (!updated) return res.status(404).json({ error: "Transação de cartão não encontrada" });
   res.json(updated);
+});
+
+// Importador de Extratos Bancários (OFX e CSV)
+router.post('/cards/import-statement', (req, res) => {
+  const { fileContent, fileName, targetCardId } = req.body;
+  if (!fileContent) {
+    return res.status(400).json({ error: "Conteúdo do arquivo de extrato não fornecido" });
+  }
+  const result = db.importStatementTransactions(fileContent, fileName, targetCardId);
+  res.status(201).json(result);
+});
+
+// Relatório de Acerto 50/50 do Casal (Quem deve para quem?)
+router.get('/reconciliation/settlement', (req, res) => {
+  const month = req.query.month || '2026-10';
+  res.json(db.calculateCoupleSettlement(month));
 });
 
 // iPhone 17 Pro Max Push / SMS Capture Engine & Apple Shortcuts Webhook
@@ -113,7 +166,6 @@ router.post('/sms/parse', (req, res) => {
   res.status(201).json(result);
 });
 
-// Webhook endpoint specifically designed for Apple Shortcuts (iOS Shortcuts)
 router.post('/shortcuts/webhook', (req, res) => {
   const rawText = req.body.message || req.body.text || req.body.body || JSON.stringify(req.body);
   const result = db.parseAndRecordSmsPush(rawText, "Apple Shortcuts (iPhone 17 Pro Max)");
@@ -133,13 +185,24 @@ router.get('/analytics/networth', (req, res) => {
   res.json(db.getNetWorthHistory());
 });
 
-// Incomes
+// Incomes - CRUD Completo
 router.get('/incomes', (req, res) => {
   const month = req.query.month || '2026-10';
   res.json(db.getIncomes(month));
 });
 
-// Wellhub
+router.post('/incomes', (req, res) => {
+  const created = db.addIncome(req.body);
+  res.status(201).json(created);
+});
+
+router.delete('/incomes/:id', (req, res) => {
+  const deleted = db.deleteIncome(req.params.id);
+  if (!deleted) return res.status(404).json({ error: "Receita não encontrada" });
+  res.json({ success: true });
+});
+
+// Wellhub - CRUD Completo
 router.get('/wellhub', (req, res) => {
   const month = req.query.month || '2026-10';
   const reimbursements = db.getWellhubReimbursements(month);
@@ -147,11 +210,39 @@ router.get('/wellhub', (req, res) => {
   res.json({ reimbursements, total });
 });
 
-// Fixed Expenses
+router.post('/wellhub', (req, res) => {
+  const created = db.addWellhubReimbursement(req.body);
+  res.status(201).json(created);
+});
+
+router.delete('/wellhub/:id', (req, res) => {
+  const deleted = db.deleteWellhubReimbursement(req.params.id);
+  if (!deleted) return res.status(404).json({ error: "Reembolso não encontrado" });
+  res.json({ success: true });
+});
+
+// Fixed Expenses - CRUD Completo
 router.get('/fixed-expenses', (req, res) => {
   const month = req.query.month || '2026-10';
   const expenses = db.getFixedExpenses(month);
   res.json({ expenses });
+});
+
+router.post('/fixed-expenses', (req, res) => {
+  const created = db.addFixedExpense(req.body);
+  res.status(201).json(created);
+});
+
+router.put('/fixed-expenses/:id', (req, res) => {
+  const updated = db.updateFixedExpense(req.params.id, req.body);
+  if (!updated) return res.status(404).json({ error: "Despesa fixa não encontrada" });
+  res.json(updated);
+});
+
+router.delete('/fixed-expenses/:id', (req, res) => {
+  const deleted = db.deleteFixedExpense(req.params.id);
+  if (!deleted) return res.status(404).json({ error: "Despesa fixa não encontrada" });
+  res.json({ success: true });
 });
 
 router.patch('/fixed-expenses/:id/toggle', (req, res) => {
@@ -160,7 +251,7 @@ router.patch('/fixed-expenses/:id/toggle', (req, res) => {
   res.json(updated);
 });
 
-// Pix Transactions
+// Pix Transactions - CRUD Completo
 router.get('/pix', (req, res) => {
   const month = req.query.month || '2026-10';
   const transactions = db.getPixTransactions(month);
@@ -168,6 +259,17 @@ router.get('/pix', (req, res) => {
   const totalOut = transactions.filter(t => t.direction === 'SAIDA').reduce((a, b) => a + Number(b.amount), 0);
   const alerts = transactions.filter(t => t.isAlert);
   res.json({ transactions, summary: { totalIn, totalOut, netFlow: totalIn - totalOut, alertsCount: alerts.length, alerts } });
+});
+
+router.post('/pix', (req, res) => {
+  const created = db.addPixTransaction(req.body);
+  res.status(201).json(created);
+});
+
+router.delete('/pix/:id', (req, res) => {
+  const deleted = db.deletePixTransaction(req.params.id);
+  if (!deleted) return res.status(404).json({ error: "Pix não encontrado" });
+  res.json({ success: true });
 });
 
 // Housing Simulation

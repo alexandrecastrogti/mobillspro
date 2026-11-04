@@ -31,16 +31,16 @@ export function InteractiveCharts({ cashFlowData, netWorthData, fixedExpenses, c
 
   const totalExpenses = categoryEntries.reduce((a, b) => a + b.value, 0) || 1;
 
-  // Color palette for Donut
+  // Paleta vibrante inspirada no Mobills Web (Azul, Laranja, Roxo, Esmeralda, Rosa)
   const colors = [
+    '#0284C7', // Sky Blue (Mobills)
+    '#F97316', // Orange (Mobills)
+    '#8B5CF6', // Purple (Mobills)
     '#10B981', // Emerald
-    '#3B82F6', // Blue
-    '#F59E0B', // Amber
-    '#8B5CF6', // Purple
-    '#EC4899', // Pink
-    '#14B8A6', // Teal
+    '#F43F5E', // Rose
+    '#0D9488', // Teal
     '#6366F1', // Indigo
-    '#F97316', // Orange
+    '#EAB308', // Amber
     '#64748B'  // Slate
   ];
 
@@ -61,32 +61,36 @@ export function InteractiveCharts({ cashFlowData, netWorthData, fixedExpenses, c
     const y2 = 100 + 70 * Math.sin(endRad);
 
     const largeArc = angle > 180 ? 1 : 0;
-    const pathData = `M ${x1} ${y1} A 70 70 0 ${largeArc} 1 ${x2} ${y2}`;
+    const pathData = `M 100 100 L ${x1} ${y1} A 70 70 0 ${largeArc} 1 ${x2} ${y2} Z`;
+
+    const circumference = 2 * Math.PI * 70;
+    const strokeDasharray = `${(angle / 360) * circumference} ${circumference}`;
+    const strokeDashoffset = -((startAngle / 360) * circumference);
 
     return {
       ...cat,
-      percentage: (percentage * 100).toFixed(1),
       color: colors[idx % colors.length],
       pathData,
-      strokeDasharray: `${percentage * 440} 440`,
-      strokeDashoffset: -startAngle * (440 / 360)
+      percentage: (percentage * 100).toFixed(1),
+      strokeDasharray,
+      strokeDashoffset
     };
   });
 
-  // Net Worth Evolution Points
+  // Net worth curve
   const netWorthList = netWorthData || [
-    { label: "Mai", totalBRL: 98400 },
-    { label: "Jun", totalBRL: 104200 },
-    { label: "Jul", totalBRL: 109800 },
-    { label: "Ago", totalBRL: 115400 },
-    { label: "Set", totalBRL: 120900 },
-    { label: "Out", totalBRL: 126387.5 }
+    { month: "2026-05", label: "Mai", totalBRL: 192400 },
+    { month: "2026-06", label: "Jun", totalBRL: 201100 },
+    { month: "2026-07", label: "Jul", totalBRL: 212800 },
+    { month: "2026-08", label: "Ago", totalBRL: 224300 },
+    { month: "2026-09", label: "Set", totalBRL: 235900 },
+    { month: "2026-10", label: "Out", totalBRL: 247000 }
   ];
 
-  const minNW = Math.min(...netWorthList.map(n => n.totalBRL)) * 0.95;
-  const maxNW = Math.max(...netWorthList.map(n => n.totalBRL)) * 1.05;
-  const nwHeight = 140;
+  const minNW = Math.min(...netWorthList.map(d => d.totalBRL)) * 0.95;
+  const maxNW = Math.max(...netWorthList.map(d => d.totalBRL)) * 1.05;
   const nwWidth = 400;
+  const nwHeight = 160;
 
   const nwPoints = netWorthList.map((pt, idx) => {
     const x = (idx / (netWorthList.length - 1)) * (nwWidth - 60) + 30;
@@ -102,46 +106,46 @@ export function InteractiveCharts({ cashFlowData, netWorthData, fixedExpenses, c
 
   // Cashflow history
   const cfList = cashFlowData || [
-    { label: "Mai", inflow: 11646.11, outflow: 5794.56 },
-    { label: "Jun", inflow: 11646.11, outflow: 5744.26 },
-    { label: "Jul", inflow: 11646.11, outflow: 5864.76 },
-    { label: "Ago", inflow: 11646.11, outflow: 5853.76 },
-    { label: "Set", inflow: 11646.11, outflow: 5794.06 },
-    { label: "Out", inflow: 11646.11, outflow: 5334.26 }
+    { label: "Mai", inflow: 11646.11, outflow: 5794.56, balance: 5851.55 },
+    { label: "Jun", inflow: 11646.11, outflow: 5744.26, balance: 5901.85 },
+    { label: "Jul", inflow: 11646.11, outflow: 5864.76, balance: 5781.35 },
+    { label: "Ago", inflow: 11646.11, outflow: 5853.76, balance: 5792.35 },
+    { label: "Set", inflow: 11646.11, outflow: 5794.06, balance: 5852.05 },
+    { label: "Out", inflow: 11646.11, outflow: 5334.26, balance: 6311.85 }
   ];
 
   const maxCF = 13000;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       
       {/* 2-COLUMN SECTION: Rosca de Despesas & Evolução Patrimonial */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         
-        {/* Gráfico 1: Despesas por Categoria (Rosca Interativa) */}
-        <div className="glass-panel rounded-3xl p-6 shadow-xl border border-gray-800 flex flex-col justify-between">
+        {/* Gráfico 1: Despesas por Categoria (Rosca Interativa Estilo Mobills) */}
+        <div className="workbench-panel rounded-2xl p-5 border border-slate-100 dark:border-[#1F232D] shadow-xs flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-800">
+            <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-100 dark:border-[#1F232D]">
               <div className="flex items-center gap-2">
-                <PieChart className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-base font-bold text-white">Despesas por Categoria</h3>
+                <PieChart className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <h3 className="text-xs font-bold text-slate-800 dark:text-zinc-200 uppercase tracking-wide">Despesas por Categoria</h3>
               </div>
-              <span className="text-xs font-mono font-bold text-gray-400">
+              <span className="text-xs font-semibold text-slate-500 dark:text-zinc-400 tabular-nums">
                 Total: {formatBRL(totalExpenses)}
               </span>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 my-2">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-5 my-2">
               {/* SVG Donut */}
-              <div className="relative w-48 h-48 shrink-0 flex items-center justify-center">
+              <div className="relative w-44 h-44 shrink-0 flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 200 200">
                   <circle
                     cx="100"
                     cy="100"
                     r="70"
                     fill="none"
-                    stroke="#1F2937"
-                    strokeWidth="24"
+                    className="stroke-slate-100 dark:stroke-[#191D26]"
+                    strokeWidth="20"
                   />
                   {donutSegments.map((seg, idx) => (
                     <circle
@@ -151,60 +155,65 @@ export function InteractiveCharts({ cashFlowData, netWorthData, fixedExpenses, c
                       r="70"
                       fill="none"
                       stroke={seg.color}
-                      strokeWidth={selectedDonutIndex === idx ? "28" : "24"}
+                      strokeWidth={selectedDonutIndex === idx ? "24" : "20"}
                       strokeDasharray={seg.strokeDasharray}
                       strokeDashoffset={seg.strokeDashoffset}
                       onMouseEnter={() => setSelectedDonutIndex(idx)}
                       onMouseLeave={() => setSelectedDonutIndex(null)}
-                      className="transition-all duration-300 cursor-pointer opacity-90 hover:opacity-100"
+                      className="transition-all duration-200 cursor-pointer"
                     />
                   ))}
                 </svg>
 
                 {/* Donut Center Display */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-4">
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-4 font-mono">
                   {selectedDonutIndex !== null ? (
                     <>
-                      <span className="text-[10px] uppercase font-bold text-gray-400 truncate max-w-[100px]">
+                      <span className="text-[10px] uppercase font-semibold text-slate-500 dark:text-zinc-400 truncate max-w-[100px]">
                         {donutSegments[selectedDonutIndex].name}
                       </span>
-                      <span className="text-sm font-black text-white font-mono">
+                      <span className="text-xs font-bold text-slate-900 dark:text-zinc-100 tabular-nums">
                         {formatBRL(donutSegments[selectedDonutIndex].value)}
                       </span>
-                      <span className="text-[10px] text-emerald-400 font-bold">
+                      <span className="text-[10px] text-purple-600 dark:text-purple-400 font-semibold">
                         {donutSegments[selectedDonutIndex].percentage}%
                       </span>
                     </>
                   ) : (
                     <>
-                      <span className="text-[10px] uppercase font-bold text-gray-400">Despesas</span>
-                      <span className="text-sm font-black text-white font-mono">
+                      <span className="text-[10px] uppercase text-slate-400 dark:text-zinc-500">Despesas</span>
+                      <span className="text-xs font-bold text-slate-900 dark:text-zinc-100 tabular-nums">
                         {formatBRL(totalExpenses)}
                       </span>
-                      <span className="text-[10px] text-gray-500">Alexandre</span>
+                      <span className="text-[10px] text-slate-400 dark:text-zinc-500">Muriaé/MG</span>
                     </>
                   )}
                 </div>
               </div>
 
-              {/* Legend List */}
-              <div className="space-y-1.5 w-full max-h-48 overflow-y-auto pr-1">
+              {/* Legend List (Accessible via Pointer & Keyboard) */}
+              <div className="space-y-1 w-full max-h-44 overflow-y-auto pr-1">
                 {donutSegments.slice(0, 6).map((seg, idx) => (
                   <div
                     key={idx}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`${seg.name}: ${formatBRL(seg.value)}, ${seg.percentage}% do total`}
                     onMouseEnter={() => setSelectedDonutIndex(idx)}
                     onMouseLeave={() => setSelectedDonutIndex(null)}
-                    className={`flex items-center justify-between p-1.5 rounded-lg text-xs cursor-pointer transition ${
-                      selectedDonutIndex === idx ? 'bg-gray-800' : 'hover:bg-gray-800/40'
+                    onFocus={() => setSelectedDonutIndex(idx)}
+                    onBlur={() => setSelectedDonutIndex(null)}
+                    className={`flex items-center justify-between p-1.5 rounded-lg text-xs cursor-pointer transition-all duration-150 focus:outline-none ${
+                      selectedDonutIndex === idx ? 'bg-purple-50 text-purple-900 dark:bg-[#1D212B] dark:text-white shadow-2xs' : 'hover:bg-slate-50 dark:hover:bg-[#141720]'
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate">
                       <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: seg.color }} />
-                      <span className="text-gray-300 truncate">{seg.name}</span>
+                      <span className="text-slate-700 dark:text-zinc-300 truncate text-[11px] font-medium">{seg.name}</span>
                     </div>
-                    <div className="flex items-center gap-2 font-mono shrink-0">
-                      <span className="font-bold text-white">{formatBRL(seg.value)}</span>
-                      <span className="text-[10px] text-gray-500 w-9 text-right">{seg.percentage}%</span>
+                    <div className="flex items-center gap-2 shrink-0 font-mono">
+                      <span className="font-bold text-slate-800 dark:text-zinc-200 tabular-nums text-[11px]">{formatBRL(seg.value)}</span>
+                      <span className="text-[10px] text-slate-400 dark:text-zinc-400 w-8 text-right font-medium">{seg.percentage}%</span>
                     </div>
                   </div>
                 ))}
@@ -212,35 +221,35 @@ export function InteractiveCharts({ cashFlowData, netWorthData, fixedExpenses, c
             </div>
           </div>
 
-          <div className="pt-3 border-t border-gray-800/80 text-[11px] text-gray-400 flex justify-between items-center">
-            <span>Classificação automatizada MobillsPro</span>
-            <span className="text-emerald-400 font-medium">Outubro/2026</span>
+          <div className="pt-2.5 border-t border-slate-100 dark:border-[#1F232D] text-[11px] font-mono text-slate-500 dark:text-zinc-500 flex justify-between items-center">
+            <span>Classificação automatizada</span>
+            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Outubro/2026</span>
           </div>
         </div>
 
-        {/* Gráfico 2: Evolução Patrimonial Familiar (SVG Curve) */}
-        <div className="glass-panel rounded-3xl p-6 shadow-xl border border-gray-800 flex flex-col justify-between">
+        {/* Gráfico 2: Evolução Patrimonial Familiar */}
+        <div className="workbench-panel rounded-2xl p-5 bg-white dark:bg-[#111318] border border-slate-100 dark:border-[#1F232D] shadow-xs flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-800">
+            <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-100 dark:border-[#1F232D]">
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-amber-400" />
-                <h3 className="text-base font-bold text-white">Evolução Patrimonial</h3>
+                <TrendingUp className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                <h3 className="text-xs font-bold text-slate-800 dark:text-zinc-200 uppercase tracking-wide">Evolução Patrimonial</h3>
               </div>
-              <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-1 rounded-lg">
+              <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/40 px-2 py-0.5 rounded-full">
                 +28.4% em 6 meses
               </span>
             </div>
 
-            <p className="text-xs text-gray-400 mb-3">
-              Crescimento constante do patrimônio líquido da família (Nomad USD + Tesouro Selic + Terreno Muriaé):
+            <p className="text-xs text-slate-500 dark:text-zinc-400 mb-2">
+              Patrimônio familiar líquido consolidado (Nomad USD + Selic + Terreno Muriaé):
             </p>
 
             {/* SVG Area Chart */}
-            <div className="w-full h-44 relative">
+            <div className="w-full h-40 relative">
               <svg className="w-full h-full overflow-visible" viewBox={`0 0 ${nwWidth} ${nwHeight}`} preserveAspectRatio="none">
                 <defs>
                   <linearGradient id="nwGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.3" />
+                    <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.25" />
                     <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.0" />
                   </linearGradient>
                 </defs>
@@ -248,17 +257,17 @@ export function InteractiveCharts({ cashFlowData, netWorthData, fixedExpenses, c
                 {/* Area */}
                 <path d={nwArea} fill="url(#nwGradient)" />
                 {/* Line */}
-                <path d={nwPath} fill="none" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <path d={nwPath} fill="none" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
 
                 {/* Points */}
                 {nwPoints.map((pt, idx) => (
                   <g key={idx} className="group cursor-pointer">
-                    <circle cx={pt.x} cy={pt.y} r="5" fill="#111827" stroke="#F59E0B" strokeWidth="2.5" />
+                    <circle cx={pt.x} cy={pt.y} r="4" fill="#FFFFFF" stroke="#F59E0B" strokeWidth="2.5" />
                     <text
                       x={pt.x}
-                      y={pt.y - 10}
+                      y={pt.y - 8}
                       textAnchor="middle"
-                      className="text-[10px] font-mono fill-gray-300 font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="text-[9px] font-mono fill-slate-700 dark:fill-zinc-300 font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       {formatBRL(pt.totalBRL)}
                     </text>
@@ -267,7 +276,7 @@ export function InteractiveCharts({ cashFlowData, netWorthData, fixedExpenses, c
               </svg>
 
               {/* X Axis Labels */}
-              <div className="flex justify-between text-[11px] font-mono text-gray-400 px-4 mt-1">
+              <div className="flex justify-between text-[10px] font-medium text-slate-500 dark:text-zinc-500 px-3 mt-1">
                 {netWorthList.map((pt, idx) => (
                   <span key={idx}>{pt.label}</span>
                 ))}
@@ -275,71 +284,71 @@ export function InteractiveCharts({ cashFlowData, netWorthData, fixedExpenses, c
             </div>
           </div>
 
-          <div className="pt-3 border-t border-gray-800/80 text-[11px] text-gray-400 flex justify-between items-center">
+          <div className="pt-2.5 border-t border-slate-100 dark:border-[#1F232D] text-[11px] font-mono text-slate-500 dark:text-zinc-500 flex justify-between items-center">
             <span>Patrimônio Atual Consolidado:</span>
-            <strong className="text-white font-mono text-xs">{formatBRL(netWorthList[netWorthList.length - 1].totalBRL)}</strong>
+            <strong className="text-slate-800 dark:text-zinc-200 font-mono text-xs tabular-nums">{formatBRL(netWorthList[netWorthList.length - 1].totalBRL)}</strong>
           </div>
         </div>
 
       </div>
 
       {/* Gráfico 3: Fluxo de Caixa Mensal (Entradas vs Saídas) */}
-      <div className="glass-panel rounded-3xl p-6 shadow-xl border border-gray-800">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-3 border-b border-gray-800">
+      <div className="workbench-panel rounded-2xl p-5 bg-white dark:bg-[#111318] border border-slate-100 dark:border-[#1F232D] shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3 pb-3 border-b border-slate-100 dark:border-[#1F232D]">
           <div className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-teal-400" />
+            <BarChart3 className="w-4 h-4 text-teal-600 dark:text-teal-400" />
             <div>
-              <h3 className="text-base font-bold text-white">Fluxo de Caixa Mensal (Entradas vs Saídas)</h3>
-              <p className="text-xs text-gray-400">Comparativo mês a mês com taxa média de sobra superior a 50%</p>
+              <h3 className="text-xs font-bold text-slate-800 dark:text-zinc-200 uppercase tracking-wide">Fluxo de Caixa Mensal (Entradas vs Saídas)</h3>
+              <p className="text-xs text-slate-500 dark:text-zinc-400">Comparativo mês a mês com taxa média de sobra superior a 50%</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-semibold">
+          <div className="flex items-center gap-3 text-xs font-mono">
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded bg-emerald-500" />
-              <span className="text-gray-300">Entradas (R$ 11.646,11)</span>
+              <div className="w-2.5 h-2.5 rounded bg-emerald-500" />
+              <span className="text-slate-600 dark:text-zinc-300 text-[11px] font-medium">Entradas</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded bg-rose-500/80" />
-              <span className="text-gray-300">Saídas Reais</span>
+              <div className="w-2.5 h-2.5 rounded bg-rose-500" />
+              <span className="text-slate-600 dark:text-zinc-300 text-[11px] font-medium">Saídas Reais</span>
             </div>
           </div>
         </div>
 
         {/* Bar chart grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 pt-3">
+        <div className="grid grid-cols-2 sm:grid-cols-6 gap-2.5 pt-2">
           {cfList.map((item, idx) => {
             const inHeight = (item.inflow / maxCF) * 100;
             const outHeight = (item.outflow / maxCF) * 100;
 
             return (
-              <div key={idx} className="bg-gray-900/60 p-3 rounded-2xl border border-gray-800/80 flex flex-col justify-between">
-                <span className="text-xs font-bold text-white text-center block mb-2">{item.label}</span>
+              <div key={idx} className="bg-slate-50 dark:bg-[#0E1015] p-2.5 rounded-xl border border-slate-100 dark:border-[#1F232D] flex flex-col justify-between font-mono">
+                <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300 text-center block mb-1">{item.label}</span>
                 
                 {/* Visual Bars Container */}
-                <div className="h-32 flex items-end justify-center gap-2 my-2">
+                <div className="h-28 flex items-end justify-center gap-2 my-1">
                   {/* Inflow Bar */}
-                  <div className="w-4 bg-gray-800/80 rounded-t-lg relative flex items-end h-full">
+                  <div className="w-3 bg-slate-200 dark:bg-[#191D26] rounded-t relative flex items-end h-full">
                     <div 
-                      className="w-full bg-emerald-500 rounded-t-lg transition-all duration-500" 
+                      className="w-full bg-emerald-500 rounded-t transition-all duration-300" 
                       style={{ height: `${inHeight}%` }}
                       title={`Entradas: ${formatBRL(item.inflow)}`}
                     />
                   </div>
 
                   {/* Outflow Bar */}
-                  <div className="w-4 bg-gray-800/80 rounded-t-lg relative flex items-end h-full">
+                  <div className="w-3 bg-slate-200 dark:bg-[#191D26] rounded-t relative flex items-end h-full">
                     <div 
-                      className="w-full bg-rose-500/80 rounded-t-lg transition-all duration-500" 
+                      className="w-full bg-rose-500 rounded-t transition-all duration-300" 
                       style={{ height: `${outHeight}%` }}
                       title={`Saídas: ${formatBRL(item.outflow)}`}
                     />
                   </div>
                 </div>
 
-                <div className="text-center pt-2 border-t border-gray-800 font-mono text-[11px]">
-                  <span className="text-emerald-400 font-bold block">+{formatBRL(item.balance)}</span>
-                  <span className="text-[10px] text-gray-500">Sobra Livre</span>
+                <div className="text-center pt-1.5 border-t border-slate-100 dark:border-[#1F232D] text-[10px]">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold tabular-nums block">+{formatBRL(item.balance)}</span>
+                  <span className="text-slate-400 dark:text-zinc-500 font-medium">Sobra Livre</span>
                 </div>
               </div>
             );

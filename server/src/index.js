@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import apiRouter from './routes/api.js';
+import v1Router from './routes/v1/index.js';
 
 dotenv.config();
 
@@ -17,7 +18,19 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// API Routes
+// Standard Healthcheck endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    service: 'MobillsPro Core Backend'
+  });
+});
+
+// API Routes (v1 e retrocompatibilidade /api)
+app.use('/api/v1', v1Router);
+app.use('/api', v1Router);
 app.use('/api', apiRouter);
 
 // Serve Static Frontend if built
@@ -45,12 +58,16 @@ app.get('*', (req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`=======================================================`);
-  console.log(`  🚀 MobillsPro Backend rodando na porta ${PORT}`);
-  console.log(`  📍 Local: http://localhost:${PORT}`);
-  console.log(`  📊 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`  🌆 Alexandre & Amanda - Muriaé/MG`);
-  console.log(`=======================================================`);
-});
+if (process.env.NODE_ENV !== 'test' && !process.argv.some(arg => arg.includes('test'))) {
+  app.listen(PORT, () => {
+    console.log(`=======================================================`);
+    console.log(`  🚀 MobillsPro Backend rodando na porta ${PORT}`);
+    console.log(`  📍 Local: http://localhost:${PORT}`);
+    console.log(`  📊 Health check: http://localhost:${PORT}/health`);
+    console.log(`  🌆 Alexandre & Amanda - Muriaé/MG`);
+    console.log(`=======================================================`);
+  });
+}
+
+export { app };
 
