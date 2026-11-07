@@ -30,8 +30,8 @@ app.get('/health', (req, res) => {
 
 // API Routes (v1 e retrocompatibilidade /api)
 app.use('/api/v1', v1Router);
-app.use('/api', v1Router);
 app.use('/api', apiRouter);
+app.use('/api', v1Router);
 
 // Serve Static Frontend if built
 const clientDistPath = path.join(__dirname, '..', '..', 'client', 'dist');

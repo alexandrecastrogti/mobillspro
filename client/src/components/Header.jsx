@@ -106,7 +106,21 @@ export function Header({
     { value: '2026-07', label: 'Julho/2026' },
     { value: '2026-08', label: 'Agosto/2026' },
     { value: '2026-09', label: 'Setembro/2026' },
-    { value: '2026-10', label: 'Outubro/2026 (Atual)' },
+    { value: '2026-10', label: 'Outubro/2026' },
+    { value: '2026-11', label: 'Novembro/2026' },
+    { value: '2026-12', label: 'Dezembro/2026' },
+    { value: '2027-01', label: 'Janeiro/2027' },
+    { value: '2027-02', label: 'Fevereiro/2027' },
+    { value: '2027-03', label: 'Março/2027' },
+    { value: '2027-04', label: 'Abril/2027' },
+    { value: '2027-05', label: 'Maio/2027' },
+    { value: '2027-06', label: 'Junho/2027' },
+    { value: '2027-07', label: 'Julho/2027' },
+    { value: '2027-08', label: 'Agosto/2027' },
+    { value: '2027-09', label: 'Setembro/2027' },
+    { value: '2027-10', label: 'Outubro/2027' },
+    { value: '2027-11', label: 'Novembro/2027' },
+    { value: '2027-12', label: 'Dezembro/2027' }
   ];
 
   // Identifica a seção ativa

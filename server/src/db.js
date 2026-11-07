@@ -81,7 +81,85 @@ export const db = {
   },
 
   // Incomes (CRUD)
+  ensureMonthInitialized(month) {
+    if (!month) return;
+
+    // 1. Incomes Rollover (Salário R$ 9.996,21 + Monitoria R$ 1.100,00)
+    const hasIncomes = state.incomes.some(i => i.referenceMonth === month);
+    if (!hasIncomes) {
+      const baseIncomes = state.incomes.filter(i => i.isRecurring && (i.referenceMonth === '2026-10' || !i.referenceMonth));
+      const template = baseIncomes.length > 0 ? baseIncomes : [
+        { userName: "Alexandre", description: "Salário Líquido Alexandre", amount: 9996.21, category: "Salário", isRecurring: true },
+        { userName: "Alexandre", description: "Monitoria", amount: 1100.00, category: "Monitoria", isRecurring: true }
+      ];
+      template.forEach((inc, idx) => {
+        state.incomes.push({
+          id: `inc-${month}-${idx + 1}`,
+          userName: inc.userName,
+          description: inc.description,
+          amount: Number(inc.amount),
+          category: inc.category,
+          isRecurring: true,
+          referenceMonth: month
+        });
+      });
+    }
+
+    // 2. Wellhub Reimbursements Rollover (Amanda R$ 183,30, Taiana R$ 183,30, Nilvana R$ 183,30)
+    const hasWellhub = state.wellhubReimbursements.some(w => w.referenceMonth === month);
+    if (!hasWellhub) {
+      const baseWellhub = state.wellhubReimbursements.filter(w => w.referenceMonth === '2026-10' || !w.referenceMonth);
+      const template = baseWellhub.length > 0 ? baseWellhub : [
+        { beneficiary: "Amanda", planName: "Wellhub Silver", amount: 183.30, description: "Reembolso Wellhub Amanda (crédito em conta/fatura)" },
+        { beneficiary: "Taiana", planName: "Wellhub Silver", amount: 183.30, description: "Reembolso Wellhub Taiana (crédito via Pix recebido)" },
+        { beneficiary: "Nilvana", planName: "Wellhub Silver", amount: 183.30, description: "Reembolso Wellhub Nilvana (crédito via Pix recebido)" }
+      ];
+      template.forEach((wh, idx) => {
+        state.wellhubReimbursements.push({
+          id: `wh-${month}-${idx + 1}`,
+          beneficiary: wh.beneficiary,
+          planName: wh.planName,
+          amount: Number(wh.amount),
+          status: "CREDITADO",
+          referenceMonth: month,
+          description: wh.description
+        });
+      });
+    }
+
+    // 3. Fixed Expenses Rollover (As 8 despesas fixas reais com status PENDENTE)
+    const hasFixed = state.fixedExpenses.some(f => f.referenceMonth === month);
+    if (!hasFixed) {
+      const baseFixed = state.fixedExpenses.filter(f => f.referenceMonth === '2026-10' || !f.referenceMonth);
+      const template = baseFixed.length > 0 ? baseFixed : [
+        { title: "Aluguel", category: "Moradia", totalAmount: 1621.00, alexandreShare: 810.50, amandaShare: 810.50, isSplit5050: true, beneficiary: "COMPARTILHADO", dueDay: 5, paymentMethod: "PIX", pixCode: "PIX-ALUGUEL-MURIAE" },
+        { title: "Parcela do Terreno", category: "Patrimônio", totalAmount: 2686.52, alexandreShare: 1343.26, amandaShare: 1343.26, isSplit5050: true, beneficiary: "COMPARTILHADO", dueDay: 10, paymentMethod: "BOLETO", pixCode: "BOL-TERRENO" },
+        { title: "Energia (Cemig)", category: "Consumo", totalAmount: 280.00, alexandreShare: 140.00, amandaShare: 140.00, isSplit5050: true, beneficiary: "COMPARTILHADO", dueDay: 12, paymentMethod: "PIX", pixCode: "CEMIG-PIX" },
+        { title: "Água (Copasa)", category: "Consumo", totalAmount: 120.00, alexandreShare: 60.00, amandaShare: 60.00, isSplit5050: true, beneficiary: "COMPARTILHADO", dueDay: 15, paymentMethod: "PIX", pixCode: "COPASA-PIX" },
+        { title: "Internet", category: "Consumo", totalAmount: 120.00, alexandreShare: 60.00, amandaShare: 60.00, isSplit5050: true, beneficiary: "COMPARTILHADO", dueDay: 20, paymentMethod: "PIX", pixCode: "INTERNET-PIX" },
+        { title: "Unimed (individual)", category: "Saúde", totalAmount: 690.00, alexandreShare: 690.00, amandaShare: 0.00, isSplit5050: false, beneficiary: "ALEXANDRE", dueDay: 8, paymentMethod: "BOLETO", pixCode: "UNIMED-BOL" },
+        { title: "Academia Alexandre", category: "Saúde & Fitness", totalAmount: 129.90, alexandreShare: 129.90, amandaShare: 0.00, isSplit5050: false, beneficiary: "ALEXANDRE", dueDay: 10, paymentMethod: "CARTAO", pixCode: "ACADEMIA-REC" },
+        { title: "Wellhub (4 planos)", category: "Benefícios & Saúde", totalAmount: 733.20, alexandreShare: 733.20, amandaShare: 0.00, isSplit5050: false, beneficiary: "ALEXANDRE", dueDay: 1, paymentMethod: "CARTAO", pixCode: "WELLHUB-REC" }
+      ];
+
+      template.forEach((exp, idx) => {
+        const dayStr = String(exp.dueDay || 10).padStart(2, '0');
+        state.fixedExpenses.push({
+          ...exp,
+          id: `fix-${month}-${idx + 1}`,
+          dueDate: `${month}-${dayStr}`,
+          status: 'PENDENTE',
+          paidAt: null,
+          referenceMonth: month
+        });
+      });
+    }
+
+    saveToFile();
+  },
+
   getIncomes(month = "2026-10") {
+    this.ensureMonthInitialized(month);
     return state.incomes.filter(i => !i.referenceMonth || i.referenceMonth === month);
   },
 
@@ -110,6 +188,7 @@ export const db = {
 
   // Wellhub (CRUD)
   getWellhubReimbursements(month = "2026-10") {
+    this.ensureMonthInitialized(month);
     return state.wellhubReimbursements.filter(w => !w.referenceMonth || w.referenceMonth === month);
   },
 
@@ -138,6 +217,7 @@ export const db = {
 
   // Fixed Expenses (CRUD)
   getFixedExpenses(month = "2026-10") {
+    this.ensureMonthInitialized(month);
     return state.fixedExpenses.filter(f => !f.referenceMonth || f.referenceMonth === month);
   },
 
@@ -568,10 +648,17 @@ export const db = {
       eligibleCards = cards.filter(c => !c.isAtypical);
     }
     
-    const cardAlexandreTotal = eligibleCards.reduce((acc, curr) => {
+    let cardAlexandreTotal = eligibleCards.reduce((acc, curr) => {
       const share = curr.isShared ? (Number(curr.amount) / 2) : Number(curr.amount);
       return acc + share;
     }, 0);
+
+    // Se o mês ainda não tiver lançamentos individuais de cartão cadastrados,
+    // aplicar a Projeção Inteligente de Cartões (Média Supermercado R$ 1.533,28 + Recorrentes R$ 905,90)
+    // Parcela auditada de Alexandre: R$ 1.848,25 para manter o balanço fiel e sem falsas ilusões
+    if (cards.length === 0) {
+      cardAlexandreTotal = 1848.25;
+    }
 
     const totalAtypicalDiscounted = cards
       .filter(c => c.isAtypical)
@@ -597,8 +684,8 @@ export const db = {
     const annualProjectedSavings = Number((magicNumber * 12).toFixed(2));
     const annualProjectedIncome = Number((totalAvailableAlexandre * 12).toFixed(2));
 
-    const savingsRate = ((magicNumber / totalAvailableAlexandre) * 100).toFixed(1);
-    const fixedCommitment = ((totalFixedAlexandre / totalAvailableAlexandre) * 100).toFixed(1);
+    const savingsRate = totalAvailableAlexandre > 0 ? Number(((magicNumber / totalAvailableAlexandre) * 100).toFixed(1)) : 0;
+    const fixedCommitment = totalAvailableAlexandre > 0 ? Number(((totalFixedAlexandre / totalAvailableAlexandre) * 100).toFixed(1)) : 0;
 
     return {
       referenceMonth: month,

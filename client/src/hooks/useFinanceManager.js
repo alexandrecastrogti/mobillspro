@@ -73,16 +73,22 @@ export function useFinanceManager(selectedMonth, period, excludeAtypical, useNew
 
       if (fixedRes.ok) {
         const data = await fixedRes.json();
-        setFixedExpensesData(data.expenses || []);
+        setFixedExpensesData(data.expenses || data.items || (Array.isArray(data) ? data : []));
       }
       if (cardsAuditRes.ok) setCardsAuditData(await cardsAuditRes.json());
       if (cardsDetailedRes.ok) setDetailedCardsData(await cardsDetailedRes.json());
       if (budgetsRes.ok) setBudgetsData(await budgetsRes.json());
-      if (pixRes.ok) setPixData(await pixRes.json());
+      if (pixRes.ok) {
+        const data = await pixRes.json();
+        setPixData(data.transactions ? data : { transactions: data.items || (Array.isArray(data) ? data : []), totalIn: data.totals?.entries || 0, totalOut: data.totals?.outflows || 0, alerts: [] });
+      }
       if (housingRes.ok) setHousingData(await housingRes.json());
       if (investRes.ok) setInvestmentsData(await investRes.json());
       if (wellhubRes.ok) setWellhubData(await wellhubRes.json());
-      if (incomesRes.ok) setIncomesData(await incomesRes.json());
+      if (incomesRes.ok) {
+        const data = await incomesRes.json();
+        setIncomesData(Array.isArray(data) ? data : (data.items || []));
+      }
       if (smsHistoryRes.ok) setSmsHistoryData(await smsHistoryRes.json());
 
     } catch (err) {
