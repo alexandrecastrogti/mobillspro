@@ -10,7 +10,25 @@ import {
   CheckCircle2
 } from 'lucide-react';
 
-export function NewTransactionModal({ isOpen, onClose, onSuccess }) {
+function parseMoneyInput(val) {
+  if (typeof val === 'number') return val;
+  if (!val) return 0;
+  let cleaned = String(val).replace(/[^\d.,]/g, '').trim();
+  if (cleaned.includes('.') && cleaned.includes(',')) {
+    cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+  } else if (cleaned.includes(',')) {
+    cleaned = cleaned.replace(',', '.');
+  }
+  return parseFloat(cleaned) || 0;
+}
+
+export function NewTransactionModal({ 
+  isOpen, 
+  onClose, 
+  onSuccess, 
+  selectedMonth = '2026-10', 
+  onAddCardTransaction 
+}) {
   const [type, setType] = useState('CARD'); // 'CARD' | 'PIX' | 'FIXED' | 'INCOME' | 'BUDGET'
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
@@ -21,10 +39,14 @@ export function NewTransactionModal({ isOpen, onClose, onSuccess }) {
   const [pixDirection, setPixDirection] = useState('SAIDA');
   const [dueDay, setDueDay] = useState(10);
   const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
   const amountInputRef = useRef(null);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      setErrorMessage(null);
+      return;
+    }
 
     // Foco imediato com seleção para aceleração de digitação (UI Matrix UX)
     setTimeout(() => {
@@ -52,9 +74,10 @@ export function NewTransactionModal({ isOpen, onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const numAmount = parseFloat(amount.replace(',', '.')) || 0;
+    setErrorMessage(null);
+    const numAmount = parseMoneyInput(amount);
     if (numAmount <= 0) {
-      alert('Por favor, informe um valor maior que zero.');
+      setErrorMessage('Por favor, informe um valor numérico válido maior que zero (ex: 150 ou 1.250,50).');
       return;
     }
 
@@ -66,73 +89,118 @@ export function NewTransactionModal({ isOpen, onClose, onSuccess }) {
         if (cardId === 'card-bradesco') cardName = "Bradesco Visa Platinum";
         if (cardId === 'card-mercadopago') cardName = "Mercado Pago Visa";
 
-        await fetch('/api/cards/transactions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            cardId,
-            cardName,
-            establishment: description || "Estabelecimento Muriaé",
-            category,
-            amount: numAmount,
-            isShared,
-            isAtypical,
-            atypicalReason: isAtypical ? "Gasto extraordinário informado pelo usuário" : null
-          })
-        });
+        const todayDayStr = String(new Date().getDate()).padStart(2, '0');
+        const transactionDate = selectedMonth ? `${selectedMonth}-${todayDayStr}` : new Date().toISOString().split('T')[0];
+
+        const payload = {
+          cardId,
+          cardName,
+          establishment: description.trim() || "Estabelecimento Muriaé",
+          category,
+          amount: numAmount,
+          isShared,
+          isAtypical,
+          atypicalReason: isAtypical ? "Gasto extraordinário informado pelo usuário" : null,
+          referenceMonth: selectedMonth || '2026-10',
+          transactionDate
+        };
+
+        if (onAddCardTransaction) {
+          const success = await onAddCardTransaction(payload);
+          if (!success) {
+            throw new Error('Não foi possível registrar a compra no cartão.');
+          }
+        } else {
+          const res = await fetch('/api/cards/transactions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.error || 'Falha ao salvar no servidor.');
+          }
+        }
       } else if (type === 'PIX') {
-        await fetch('/api/pix', {
+        const payload = {
+          direction: pixDirection,
+          amount: numAmount,
+          partyName: description.trim() || "Favorecido Pix",
+          category,
+          description: `Transação Pix: ${description.trim() || 'Avulso'}`,
+          referenceMonth: selectedMonth || '2026-10',
+          transactionDate: new Date().toISOString()
+        };
+        const res = await fetch('/api/pix', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            direction: pixDirection,
-            amount: numAmount,
-            partyName: description || "Favorecido Pix",
-            category,
-            description: `Transação Pix manual: ${description}`
-          })
+          body: JSON.stringify(payload)
         });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Falha ao registrar Pix.');
+        }
       } else if (type === 'FIXED') {
-        await fetch('/api/fixed-expenses', {
+        const payload = {
+          title: description.trim() || "Despesa Fixa",
+          category,
+          totalAmount: numAmount,
+          isSplit5050: isShared,
+          beneficiary: isShared ? "COMPARTILHADO" : "ALEXANDRE",
+          dueDay: Number(dueDay) || 10,
+          referenceMonth: selectedMonth || '2026-10',
+          dueDate: `${selectedMonth || '2026-10'}-${String(dueDay || 10).padStart(2, '0')}`
+        };
+        const res = await fetch('/api/fixed-expenses', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: description || "Despesa Fixa",
-            category,
-            totalAmount: numAmount,
-            isSplit5050: isShared,
-            beneficiary: isShared ? "COMPARTILHADO" : "ALEXANDRE",
-            dueDay: Number(dueDay) || 10
-          })
+          body: JSON.stringify(payload)
         });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Falha ao cadastrar despesa fixa.');
+        }
       } else if (type === 'INCOME') {
-        await fetch('/api/incomes', {
+        const payload = {
+          userName: isShared ? "Alexandre & Amanda" : "Alexandre",
+          description: description.trim() || "Nova Entrada",
+          amount: numAmount,
+          category: "Receitas Extras",
+          referenceMonth: selectedMonth || '2026-10'
+        };
+        const res = await fetch('/api/incomes', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userName: isShared ? "Alexandre & Amanda" : "Alexandre",
-            description: description || "Nova Entrada",
-            amount: numAmount,
-            category: "Receitas Extras"
-          })
+          body: JSON.stringify(payload)
         });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Falha ao registrar receita.');
+        }
       } else if (type === 'BUDGET') {
-        await fetch('/api/budgets', {
+        const res = await fetch('/api/budgets', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            category: description || "Nova Categoria",
+            category: description.trim() || "Nova Categoria",
             targetAmount: numAmount,
             shared5050: isShared
           })
         });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Falha ao registrar meta.');
+        }
       }
 
+      setAmount('');
+      setDescription('');
+      setIsAtypical(false);
       if (onSuccess) onSuccess();
       onClose();
     } catch (err) {
       console.error('Erro ao salvar lançamento:', err);
-      alert('Erro ao salvar no servidor.');
+      setErrorMessage(err.message || 'Erro ao salvar no servidor.');
     } finally {
       setSubmitting(false);
     }
@@ -155,7 +223,9 @@ export function NewTransactionModal({ isOpen, onClose, onSuccess }) {
             </div>
             <div>
               <h3 id="modal-title" className="text-sm font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-wide">Novo Lançamento Dinâmico</h3>
-              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Inserção e recálculo do balanço em tempo real</p>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">
+                Mês de referência: <span className="font-semibold text-purple-600 dark:text-purple-400">{selectedMonth}</span>
+              </p>
             </div>
           </div>
           <button
@@ -166,6 +236,13 @@ export function NewTransactionModal({ isOpen, onClose, onSuccess }) {
             <X className="w-4 h-4" />
           </button>
         </div>
+
+        {errorMessage && (
+          <div className="mt-3 p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-950/50 dark:border-rose-900 dark:text-rose-300 text-xs flex items-center gap-2">
+            <span>⚠</span>
+            <span>{errorMessage}</span>
+          </div>
+        )}
 
         {/* Type Selector Tabs */}
         <div className="grid grid-cols-4 gap-1.5 p-1 bg-slate-100 dark:bg-[#0D0F14] border border-slate-200 dark:border-[#1F232D] rounded-xl my-4 text-xs">

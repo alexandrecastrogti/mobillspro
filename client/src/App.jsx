@@ -74,6 +74,9 @@ export default function App() {
     // CRUD Actions
     toggleFixedExpense,
     deleteFixedExpense,
+    updateFixedExpense,
+    updateCurrentBalance,
+    addCardTransaction,
     toggleAtypicalTransaction,
     deleteCardTransaction,
     updateCreditCard,
@@ -162,6 +165,7 @@ export default function App() {
             cardTransactions={cardsAuditData?.transactions}
             onOpenNewModal={() => setIsNewModalOpen(true)}
             onResetSystem={resetSystem}
+            onUpdateBalance={updateCurrentBalance}
           />
         )}
 
@@ -208,6 +212,7 @@ export default function App() {
             expenses={fixedExpensesData}
             onToggleStatus={toggleFixedExpense}
             onDeleteExpense={deleteFixedExpense}
+            onUpdateExpense={updateFixedExpense}
             onOpenNewModal={() => setIsNewModalOpen(true)}
             selectedMonth={selectedMonth}
           />
@@ -287,6 +292,8 @@ export default function App() {
         isOpen={isNewModalOpen}
         onClose={() => setIsNewModalOpen(false)}
         onSuccess={refreshData}
+        selectedMonth={selectedMonth}
+        onAddCardTransaction={addCardTransaction}
       />
 
       {/* Footer / System Status Console */}

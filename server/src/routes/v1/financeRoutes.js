@@ -1,5 +1,6 @@
 
 import { Router } from 'express';
+import { db } from '../../db.js';
 import { exactSeedData } from '../../seedDataExact.js';
 import {
   calculateIncome,
@@ -180,6 +181,18 @@ router.get('/cards', (req, res) => {
     excludedTransactions: currentExcludedTransactions,
     ...projection
   });
+});
+
+/**
+ * POST /api/v1/cards/transactions
+ */
+router.post('/cards/transactions', (req, res) => {
+  try {
+    const created = db.addCardTransaction(req.body);
+    res.status(201).json(created);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 /**

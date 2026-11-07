@@ -8,19 +8,75 @@ import {
   CreditCard, 
   Download,
   Plus,
-  Trash2
+  Trash2,
+  Edit2,
+  Save,
+  X,
+  Users
 } from 'lucide-react';
 import { formatBRL, formatDateBR } from '../utils/formatters';
+
+function parseMoneyInput(val) {
+  if (typeof val === 'number') return val;
+  if (!val) return 0;
+  let cleaned = String(val).replace(/[^\d.,]/g, '').trim();
+  if (cleaned.includes('.') && cleaned.includes(',')) {
+    cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+  } else if (cleaned.includes(',')) {
+    cleaned = cleaned.replace(',', '.');
+  }
+  return parseFloat(cleaned) || 0;
+}
 
 export function FixedExpensesChecklist({ 
   expenses, 
   onToggleStatus, 
   onDeleteExpense,
+  onUpdateExpense,
   onOpenNewModal,
   selectedMonth 
 }) {
   const [filter, setFilter] = useState('ALL');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
+
+  // Edit Expense State
+  const [editingExpense, setEditingExpense] = useState(null);
+  const [editTotal, setEditTotal] = useState('');
+  const [editTitle, setEditTitle] = useState('');
+  const [editDueDay, setEditDueDay] = useState(10);
+  const [saving, setSaving] = useState(false);
+
+  const handleStartEdit = (item) => {
+    setEditingExpense(item);
+    setEditTotal(String(item.totalAmount));
+    setEditTitle(item.title);
+    setEditDueDay(item.dueDay || 10);
+  };
+
+  const handleSaveEdit = async (e) => {
+    if (e) e.preventDefault();
+    if (!editingExpense || !onUpdateExpense) return;
+    const parsedAmount = parseMoneyInput(editTotal);
+    if (parsedAmount <= 0) {
+      alert('Por favor, informe um valor válido maior que zero.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await onUpdateExpense(editingExpense.id, {
+        totalAmount: parsedAmount,
+        title: editTitle.trim() || editingExpense.title,
+        dueDay: Number(editDueDay) || editingExpense.dueDay
+      });
+      setEditingExpense(null);
+    } catch (err) {
+      console.error('Erro ao salvar despesa fixa:', err);
+      alert('Erro ao salvar no servidor.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (!expenses || expenses.length === 0) {
     return (
@@ -318,6 +374,14 @@ export function FixedExpensesChecklist({
                   </span>
 
                   <button
+                    onClick={() => handleStartEdit(item)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:text-zinc-500 dark:hover:text-purple-400 dark:hover:bg-purple-950/40 transition cursor-pointer"
+                    title="Editar valor ou vencimento da conta (ex: energia Cemig, água Copasa)"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+
+                  <button
                     onClick={() => handleDelete(item.id, item.title)}
                     className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:text-zinc-500 dark:hover:text-rose-400 dark:hover:bg-rose-950/40 transition cursor-pointer"
                     title="Excluir despesa fixa"
@@ -331,6 +395,126 @@ export function FixedExpensesChecklist({
           );
         })}
       </div>
+
+      {/* MODAL DE EDIÇÃO DE DESPESA FIXA (Ex: Variação de Luz Cemig e Água Copasa) */}
+      {editingExpense && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/85 backdrop-blur-xs animate-fadeIn font-mono"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="bg-white dark:bg-[#12151D] border border-slate-200 dark:border-[#2B303E] rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl relative">
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100 dark:border-[#1F232D]">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border border-purple-200 dark:border-purple-800/40">
+                  <Edit2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-wide">
+                    Ajustar Despesa Fixa
+                  </h3>
+                  <span className="text-[11px] text-slate-500 dark:text-zinc-400">
+                    Mês de referência: {selectedMonth}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditingExpense(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-[#1E232F] transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-4 mt-4 text-xs">
+              <div>
+                <label className="text-[11px] font-bold text-slate-700 dark:text-zinc-400 block mb-1">
+                  Nome da Conta:
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-[#0D0F14] border border-slate-300 dark:border-[#2B303E] rounded-lg px-3 py-2 text-slate-900 dark:text-zinc-100 font-semibold outline-none focus:border-purple-500 transition"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[11px] font-bold text-slate-700 dark:text-zinc-400">
+                    Valor Total da Fatura / Boleto (R$):
+                  </label>
+                  <span className="text-[10px] text-purple-600 dark:text-purple-400 font-semibold">
+                    {editingExpense.isSplit5050 ? 'Rateio 50/50 Amanda' : '100% Alexandre'}
+                  </span>
+                </div>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">
+                    R$
+                  </span>
+                  <input
+                    type="text"
+                    required
+                    autoFocus
+                    value={editTotal}
+                    onChange={(e) => setEditTotal(e.target.value)}
+                    placeholder="Ex: 280,00 ou 310,50"
+                    className="w-full bg-slate-50 dark:bg-[#0D0F14] border border-slate-300 dark:border-[#2B303E] rounded-lg px-3 pl-9 py-2 text-slate-900 dark:text-zinc-100 font-bold text-sm outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 tabular-nums"
+                  />
+                </div>
+                
+                {/* Rateio Preview em Tempo Real */}
+                <div className="mt-2 p-2.5 rounded-lg bg-slate-50 dark:bg-[#0D0F14] border border-slate-200 dark:border-[#1F232D] text-[11px]">
+                  {editingExpense.isSplit5050 ? (
+                    <div className="flex justify-between items-center text-slate-700 dark:text-zinc-300">
+                      <span>Sua Cota (50%): <strong className="text-emerald-600 dark:text-emerald-400">{formatBRL(parseMoneyInput(editTotal) / 2)}</strong></span>
+                      <span>Amanda (50%): <strong className="text-slate-500">{formatBRL(parseMoneyInput(editTotal) / 2)}</strong></span>
+                    </div>
+                  ) : (
+                    <div className="text-slate-700 dark:text-zinc-300">
+                      <span>Sua Responsabilidade: <strong className="text-emerald-600 dark:text-emerald-400">{formatBRL(parseMoneyInput(editTotal))}</strong> (Individual Alexandre)</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-slate-700 dark:text-zinc-400 block mb-1">
+                  Dia do Vencimento:
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="31"
+                  required
+                  value={editDueDay}
+                  onChange={(e) => setEditDueDay(Number(e.target.value))}
+                  className="w-full bg-slate-50 dark:bg-[#0D0F14] border border-slate-300 dark:border-[#2B303E] rounded-lg px-3 py-2 text-slate-900 dark:text-zinc-100 outline-none focus:border-purple-500"
+                />
+              </div>
+
+              <div className="pt-3 flex items-center justify-end gap-2.5 border-t border-slate-100 dark:border-[#1F232D]">
+                <button
+                  type="button"
+                  onClick={() => setEditingExpense(null)}
+                  className="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-[#161922] dark:hover:bg-[#1E232F] dark:text-zinc-400 font-semibold transition cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98]"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{saving ? 'Salvando...' : 'Salvar Alterações'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );

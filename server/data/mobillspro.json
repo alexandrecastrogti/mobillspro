@@ -8,7 +8,8 @@
     "totalIncomeAlexandre": 11096.21,
     "wellhubReimbursementTotal": 549.9,
     "currentMonth": "2026-10",
-    "device": "iPhone 17 Pro Max (iOS 20)"
+    "device": "iPhone 17 Pro Max (iOS 20)",
+    "currentAccountBalance": 11935.12
   },
   "incomes": [
     {
@@ -143,9 +144,9 @@
       "id": "fix-3",
       "title": "Energia Elétrica (Energisa Muriaé)",
       "category": "Contas de Consumo",
-      "totalAmount": 380,
-      "alexandreShare": 190,
-      "amandaShare": 190,
+      "totalAmount": 280,
+      "alexandreShare": 140,
+      "amandaShare": 140,
       "isSplit5050": true,
       "beneficiary": "COMPARTILHADO",
       "dueDay": 20,

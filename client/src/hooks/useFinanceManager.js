@@ -122,6 +122,63 @@ export function useFinanceManager(selectedMonth, period, excludeAtypical, useNew
     }
   };
 
+  const updateFixedExpense = async (id, payload) => {
+    try {
+      const res = await fetch(`${API_BASE}/fixed-expenses/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        await refreshData();
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Erro ao atualizar despesa fixa:', err);
+      return false;
+    }
+  };
+
+  const updateCurrentBalance = async (newBalance) => {
+    try {
+      const res = await fetch(`${API_BASE}/profile/balance`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentAccountBalance: Number(newBalance) })
+      });
+      if (res.ok) {
+        await refreshData();
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Erro ao atualizar saldo atual:', err);
+      return false;
+    }
+  };
+
+  const addCardTransaction = async (payload) => {
+    try {
+      const res = await fetch(`${API_BASE}/cards/transactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...payload,
+          referenceMonth: payload.referenceMonth || selectedMonth
+        })
+      });
+      if (res.ok) {
+        await refreshData();
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Erro ao adicionar transação de cartão:', err);
+      return false;
+    }
+  };
+
   const toggleAtypicalTransaction = async (id) => {
     try {
       const res = await fetch(`${API_BASE}/cards/transactions/${id}/toggle-atypical`, { method: 'PATCH' });
@@ -223,6 +280,9 @@ export function useFinanceManager(selectedMonth, period, excludeAtypical, useNew
     // Actions
     toggleFixedExpense,
     deleteFixedExpense,
+    updateFixedExpense,
+    updateCurrentBalance,
+    addCardTransaction,
     toggleAtypicalTransaction,
     deleteCardTransaction,
     updateCreditCard,

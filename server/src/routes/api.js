@@ -25,6 +25,14 @@ router.put('/profile', (req, res) => {
   res.json(updated);
 });
 
+router.put('/profile/balance', (req, res) => {
+  const { currentAccountBalance } = req.body;
+  const num = Number(currentAccountBalance);
+  if (isNaN(num)) return res.status(400).json({ error: "Saldo inválido" });
+  const updated = db.updateProfile({ currentAccountBalance: num });
+  res.json({ success: true, profile: updated });
+});
+
 // Dashboard Summary & Real-time Magic Number
 router.get('/dashboard/summary', (req, res) => {
   const month = req.query.month || '2026-10';

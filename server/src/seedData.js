@@ -11,6 +11,7 @@ export const initialData = {
     totalIncomeAlexandre: 11096.21,
     wellhubReimbursementTotal: 549.90,
     currentMonth: "2026-10",
+    currentAccountBalance: 11935.12,
     device: "iPhone 17 Pro Max (iOS 20)"
   },
 

@@ -29,13 +29,27 @@ import {
   SlidersHorizontal,
   ArrowRightLeft,
   Copy,
-  Check
+  Check,
+  Edit2,
+  X
 } from 'lucide-react';
 import { formatBRL, formatUSD, formatPercent } from '../utils/formatters';
 import { Landmark, ArrowUp, ArrowDown } from 'lucide-react';
 import { InteractiveCharts } from './InteractiveCharts';
 import { CashflowCalendarWidget } from './CashflowCalendarWidget';
 import { DashboardSkeleton } from './DashboardSkeleton';
+
+function parseMoneyInput(val) {
+  if (typeof val === 'number') return val;
+  if (!val) return 0;
+  let cleaned = String(val).replace(/[^\d.,]/g, '').trim();
+  if (cleaned.includes('.') && cleaned.includes(',')) {
+    cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+  } else if (cleaned.includes(',')) {
+    cleaned = cleaned.replace(',', '.');
+  }
+  return parseFloat(cleaned) || 0;
+}
 
 export function DashboardView({
   summaryData,
@@ -50,9 +64,13 @@ export function DashboardView({
   fixedExpenses,
   cardTransactions,
   onOpenNewModal,
-  onResetSystem
+  onResetSystem,
+  onUpdateBalance
 }) {
   const [copiedPix, setCopiedPix] = useState(false);
+  const [isEditingBalance, setIsEditingBalance] = useState(false);
+  const [editBalanceVal, setEditBalanceVal] = useState('');
+  const [savingBalance, setSavingBalance] = useState(false);
 
   if (!summaryData || !summaryData.balance) {
     return <DashboardSkeleton />;
@@ -76,6 +94,36 @@ export function DashboardView({
       console.warn('Clipboard write fallback:', err);
       setCopiedPix(true);
       setTimeout(() => setCopiedPix(false), 2000);
+    }
+  };
+
+  const currentAccountBalance = profile?.currentAccountBalance !== undefined 
+    ? profile.currentAccountBalance 
+    : 11935.12;
+
+  const handleStartEditBalance = (e) => {
+    e.stopPropagation();
+    setEditBalanceVal(String(currentAccountBalance));
+    setIsEditingBalance(true);
+  };
+
+  const handleSaveBalance = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const parsed = parseMoneyInput(editBalanceVal);
+    if (isNaN(parsed)) return;
+    setSavingBalance(true);
+    try {
+      if (onUpdateBalance) {
+        await onUpdateBalance(parsed);
+      }
+      setIsEditingBalance(false);
+    } catch (err) {
+      console.error('Erro ao atualizar saldo atual:', err);
+    } finally {
+      setSavingBalance(false);
     }
   };
 
@@ -143,26 +191,81 @@ export function DashboardView({
          ========================================================================= */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        {/* Card 1: Saldo Livre Real (Número Mágico) */}
+        {/* Card 1: Saldo Atual (Editável) & Saldo Livre Real (Número Mágico) */}
         <div 
-          onClick={() => setActiveTab('budget503020')}
-          className="workbench-card p-4 sm:p-5 flex items-center justify-between cursor-pointer group hover:border-sky-300 transition-all"
-          role="button"
-          tabIndex={0}
-          title="Saldo Livre Real apurado após fixas e cartões"
+          className="workbench-card p-4 sm:p-5 flex items-center justify-between group hover:border-sky-300 transition-all relative"
+          role="region"
+          aria-label="Saldo atual e saldo livre real"
         >
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-3.5 w-full">
             <div className="w-11 h-11 rounded-full bg-[#0284C7] text-white flex items-center justify-center shadow-md shadow-sky-500/25 shrink-0">
               <Landmark className="w-5 h-5 stroke-[2.2]" />
             </div>
-            <div>
-              <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-zinc-400 font-medium">
-                <span>Saldo livre real</span>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium">Saldo atual</span>
+                {!isEditingBalance && (
+                  <button
+                    onClick={handleStartEditBalance}
+                    className="p-1 rounded text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition cursor-pointer"
+                    title="Editar saldo bancário atual (Clique para alterar)"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white tabular-nums mt-0.5 tracking-tight font-mono">
-                {formatBRL(balance.magicNumber)}
-              </div>
+
+              {isEditingBalance ? (
+                <form onSubmit={handleSaveBalance} className="mt-1 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                  <div className="relative flex-1">
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">R$</span>
+                    <input
+                      type="text"
+                      autoFocus
+                      value={editBalanceVal}
+                      onChange={(e) => setEditBalanceVal(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') setIsEditingBalance(false);
+                      }}
+                      className="w-full pl-7 pr-2 py-1 text-sm font-bold font-mono bg-white dark:bg-[#12151D] border border-sky-400 rounded-lg outline-none text-slate-900 dark:text-white"
+                      placeholder="0,00"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={savingBalance}
+                    className="p-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg transition cursor-pointer shrink-0"
+                    title="Salvar novo saldo"
+                  >
+                    <Check className="w-4 h-4 stroke-[2.5]" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setIsEditingBalance(false); }}
+                    className="p-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 text-slate-500 rounded-lg transition cursor-pointer shrink-0"
+                    title="Cancelar"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </form>
+              ) : (
+                <div 
+                  onClick={handleStartEditBalance}
+                  className="cursor-pointer group/val"
+                  title="Clique para editar o saldo atual"
+                >
+                  <div className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white tabular-nums tracking-tight font-mono group-hover/val:text-sky-600 dark:group-hover/val:text-sky-400 transition">
+                    {formatBRL(currentAccountBalance)}
+                  </div>
+                  <div className="text-[10px] text-slate-500 dark:text-zinc-400 font-mono mt-0.5 truncate flex items-center gap-1">
+                    <span>Livre:</span>
+                    <strong className={balance.magicNumber >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-600"}>
+                      {formatBRL(balance.magicNumber)}
+                    </strong>
+                    <span className="text-[9px] text-slate-400">(pós fixas)</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

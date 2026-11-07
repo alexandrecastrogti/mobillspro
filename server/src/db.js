@@ -46,12 +46,18 @@ function loadFromFile() {
       if (!state.cashFlowHistory) state.cashFlowHistory = JSON.parse(JSON.stringify(initialData.cashFlowHistory));
       if (!state.netWorthHistory) state.netWorthHistory = JSON.parse(JSON.stringify(initialData.netWorthHistory));
       if (!state.smsPushCaptures) state.smsPushCaptures = JSON.parse(JSON.stringify(initialData.smsPushCaptures));
+      if (!state.profile) state.profile = JSON.parse(JSON.stringify(initialData.profile));
+      if (state.profile.currentAccountBalance === undefined) state.profile.currentAccountBalance = 11935.12;
+      if (!state.cardTransactions) state.cardTransactions = JSON.parse(JSON.stringify(initialData.cardTransactions || []));
       return;
     }
   } catch (err) {
     console.warn('[MobillsPro DB] Error reading JSON DB, fallback to initial seed:', err.message);
   }
   state = JSON.parse(JSON.stringify(initialData));
+  if (state.profile && state.profile.currentAccountBalance === undefined) {
+    state.profile.currentAccountBalance = 11935.12;
+  }
   saveToFile();
 }
 
@@ -71,10 +77,16 @@ export const db = {
   },
 
   getProfile() {
+    if (!state.profile) state.profile = JSON.parse(JSON.stringify(initialData.profile));
+    if (state.profile.currentAccountBalance === undefined) state.profile.currentAccountBalance = 11935.12;
     return state.profile;
   },
 
   updateProfile(updates) {
+    if (!state.profile) state.profile = JSON.parse(JSON.stringify(initialData.profile));
+    if (updates.currentAccountBalance !== undefined) {
+      updates.currentAccountBalance = Number(Number(updates.currentAccountBalance).toFixed(2));
+    }
     state.profile = { ...state.profile, ...updates };
     saveToFile();
     return state.profile;
@@ -238,7 +250,33 @@ export const db = {
   updateFixedExpense(id, updates) {
     const index = state.fixedExpenses.findIndex(f => f.id === id);
     if (index === -1) return null;
-    state.fixedExpenses[index] = { ...state.fixedExpenses[index], ...updates };
+    const current = state.fixedExpenses[index];
+
+    let totalAmount = updates.totalAmount !== undefined ? Number(Number(updates.totalAmount).toFixed(2)) : current.totalAmount;
+    let isSplit5050 = updates.isSplit5050 !== undefined ? updates.isSplit5050 : current.isSplit5050;
+    let alexandreShare = updates.alexandreShare !== undefined 
+      ? Number(Number(updates.alexandreShare).toFixed(2)) 
+      : (isSplit5050 ? Number((totalAmount / 2).toFixed(2)) : totalAmount);
+    let amandaShare = updates.amandaShare !== undefined 
+      ? Number(Number(updates.amandaShare).toFixed(2)) 
+      : (isSplit5050 ? Number((totalAmount - alexandreShare).toFixed(2)) : 0);
+
+    let dueDay = updates.dueDay !== undefined ? Number(updates.dueDay) : current.dueDay;
+    let dueDate = updates.dueDate || current.dueDate;
+    if (updates.dueDay && current.referenceMonth) {
+      dueDate = `${current.referenceMonth}-${String(dueDay).padStart(2, '0')}`;
+    }
+
+    state.fixedExpenses[index] = { 
+      ...current, 
+      ...updates,
+      totalAmount,
+      isSplit5050,
+      alexandreShare,
+      amandaShare,
+      dueDay,
+      dueDate
+    };
     saveToFile();
     return state.fixedExpenses[index];
   },
@@ -344,28 +382,41 @@ export const db = {
   },
 
   addCardTransaction(item) {
+    const amount = Number(Number(item.amount).toFixed(2)) || 0;
+    const cardId = item.cardId || "card-nubank";
+    let cardName = item.cardName;
+    if (!cardName) {
+      if (cardId === 'card-bradesco') cardName = "Bradesco Visa Platinum";
+      else if (cardId === 'card-mercadopago') cardName = "Mercado Pago Visa";
+      else cardName = "Nubank Ultravioleta";
+    }
+
     const newItem = {
       id: `tx-c-${Date.now()}`,
-      cardId: item.cardId || "card-nubank",
-      cardName: item.cardName || "Nubank Ultravioleta",
+      cardId,
+      cardName,
       establishment: item.establishment || "Estabelecimento Muriaé",
       category: item.category || "Supermercados Muriaé",
-      amount: Number(item.amount) || 0,
+      amount,
       transactionDate: item.transactionDate || new Date().toISOString().split('T')[0],
       installmentInfo: item.installmentInfo || "À vista",
       isAtypical: !!item.isAtypical,
       atypicalReason: item.atypicalReason || null,
-      referenceMonth: item.referenceMonth || state.profile.currentMonth,
+      referenceMonth: item.referenceMonth || state.profile.currentMonth || "2026-10",
       isShared: item.isShared !== undefined ? item.isShared : true
     };
+
+    if (!state.cardTransactions) state.cardTransactions = [];
     state.cardTransactions.push(newItem);
 
     // Update usedLimit on the card
-    const card = state.creditCards.find(c => c.id === newItem.cardId);
-    if (card) {
-      card.usedLimit = Number((card.usedLimit + newItem.amount).toFixed(2));
-      card.availableLimit = Number((card.creditLimit - card.usedLimit).toFixed(2));
-      card.currentInvoice = Number((card.currentInvoice + newItem.amount).toFixed(2));
+    if (state.creditCards) {
+      const card = state.creditCards.find(c => c.id === newItem.cardId);
+      if (card) {
+        card.usedLimit = Number(((card.usedLimit || 0) + amount).toFixed(2));
+        card.availableLimit = Number(((card.creditLimit || 10000) - card.usedLimit).toFixed(2));
+        card.currentInvoice = Number(((card.currentInvoice || 0) + amount).toFixed(2));
+      }
     }
 
     saveToFile();
@@ -467,20 +518,32 @@ export const db = {
   },
 
   addPixTransaction(item) {
+    const amount = Number(Number(item.amount).toFixed(2)) || 0;
     const newItem = {
       id: `pix-${Date.now()}`,
       direction: item.direction || 'SAIDA',
-      amount: Number(item.amount) || 0,
+      amount,
       partyName: item.partyName || "Favorecido Pix",
       category: item.category || "Geral / Avulso",
       description: item.description || "Transação Pix",
       transactionDate: item.transactionDate || new Date().toISOString(),
       e2eId: item.e2eId || `E${Date.now().toString().padStart(24, '0')}`,
-      isAlert: item.isAlert !== undefined ? item.isAlert : (item.direction === 'SAIDA' && Number(item.amount) > 200),
+      isAlert: item.isAlert !== undefined ? item.isAlert : (item.direction === 'SAIDA' && amount > 200),
       alertReason: item.alertReason || (item.direction === 'SAIDA' ? "Pix avulso registrado pelo usuário" : null),
-      referenceMonth: item.referenceMonth || state.profile.currentMonth
+      referenceMonth: item.referenceMonth || state.profile.currentMonth || "2026-10"
     };
+    if (!state.pixTransactions) state.pixTransactions = [];
     state.pixTransactions.push(newItem);
+
+    // REGRA: "quando eu fizer um lançamento pix atualize o saldo"
+    if (!state.profile) state.profile = JSON.parse(JSON.stringify(initialData.profile));
+    if (state.profile.currentAccountBalance === undefined) state.profile.currentAccountBalance = 11935.12;
+    if (newItem.direction === 'ENTRADA') {
+      state.profile.currentAccountBalance = Number((state.profile.currentAccountBalance + amount).toFixed(2));
+    } else {
+      state.profile.currentAccountBalance = Number((state.profile.currentAccountBalance - amount).toFixed(2));
+    }
+
     saveToFile();
     return newItem;
   },
@@ -488,7 +551,17 @@ export const db = {
   deletePixTransaction(id) {
     const idx = state.pixTransactions.findIndex(p => p.id === id);
     if (idx === -1) return false;
-    state.pixTransactions.splice(idx, 1);
+    const removed = state.pixTransactions.splice(idx, 1)[0];
+
+    // Reverte impacto no saldo atual ao excluir lançamento Pix
+    if (removed && state.profile && state.profile.currentAccountBalance !== undefined) {
+      if (removed.direction === 'ENTRADA') {
+        state.profile.currentAccountBalance = Number((state.profile.currentAccountBalance - removed.amount).toFixed(2));
+      } else {
+        state.profile.currentAccountBalance = Number((state.profile.currentAccountBalance + removed.amount).toFixed(2));
+      }
+    }
+
     saveToFile();
     return true;
   },
